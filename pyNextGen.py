@@ -10,6 +10,7 @@ import sys
 
 # TODO Use threading
 
+
 def fastq_stats(fastqs):
     bfq.print_all_stats(fastqs)
 
