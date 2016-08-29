@@ -8,6 +8,7 @@ import sys
 # predefined) without having to specify a - flag each time. ie cannot
 # do: "pyNextGen data/*"
 
+# TODO Use threading
 
 def fastq_stats(fastqs):
     bfq.print_all_stats(fastqs)
