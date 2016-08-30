@@ -5,7 +5,6 @@ import basics_nuc_seq as bns
 import collections
 import os.path
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

@@ -1,5 +1,6 @@
 #! /usr/bin/python
 
+import logging
 import basics_fastq as bfq
 import sys
 
@@ -15,4 +16,7 @@ def fastq_stats(fastqs):
     bfq.print_all_stats(fastqs)
 
 if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.ERROR)
+
     fastq_stats(sys.argv[1:])
