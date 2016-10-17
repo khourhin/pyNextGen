@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 import logging
 import numpy
 import pysam
@@ -53,9 +54,20 @@ def print_all_stats(fastqs_list):
     for fq in fastqs_list:
         res_list.append(fastq_stats(fq))
 
+    p = Pool(len(fastqs_list))
+    res_list = (p.map(fastq_stats, fastqs_list))
+
     # header
     print(",".join(res_list[0].keys()))
 
     # Rows
     for res in res_list:
         print(",".join([str(x) for x in res.values()]))
+
+
+    # header
+#    print(",".join(res_list[0].keys()))
+
+    # Rows
+    # for res in res_list:
+    #     print(",".join([str(x) for x in res.values()]))
