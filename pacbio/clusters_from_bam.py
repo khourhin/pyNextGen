@@ -4,7 +4,6 @@ import pysam
 import logging
 import numpy as np
 import subprocess
-import click
 from collections import Counter
 from itertools import chain
 import matplotlib.pyplot as plt
@@ -114,6 +113,10 @@ def get_exon_count_per_read(bam):
 
         count_dict[rd.query_name] = ''.join([x.split('\t')[3]
                                              for x in out.strip().split('\n')])
+
+        with open(config_count_out, 'a') as f:
+            f.write(rd.query_name + '\t')
+            f.write('\t'.join(list(count_dict[rd.query_name])) + '\n')
 
     log.info('Total sequences put in single indexed bams: {}'.format(fcount))
     return count_dict
