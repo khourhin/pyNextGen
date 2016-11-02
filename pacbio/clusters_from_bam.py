@@ -8,6 +8,13 @@ from collections import Counter
 from itertools import chain
 import matplotlib.pyplot as plt
 
+# ROOM FOR IMPROVEMENT...
+
+# Sort isoform by abundance and named them iso_1 ... iso_n according
+# to abundance
+# Display name of the iso in the bam/fas file
+
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -169,13 +176,15 @@ if __name__ == '__main__':
     config_outfolder = sys.argv[2]
 
     config_potential_exon = os.path.join(config_outfolder, 'potential_exons.bed')
+    config_potential_exon = '/home/ekornobis/analysis/allemand/v1/bam_clustering/all_bed_exons/total_sort_edited_merged.bed'
     config_bam_out = os.path.join(config_outfolder, 'bam_tmp')
     config_bam_clusters = os.path.join(config_outfolder, 'bam_clusters')
     config_fas_clusters = os.path.join(config_outfolder, 'fas_clusters')
     config_count_out = os.path.join(config_outfolder, 'counts')
     
     prepare_outfolder()
-    get_putative_exons(config_bam)
+#    get_putative_exons(config_bam)
     get_overall_exon_counts(config_bam)
     count_dict = get_exon_count_per_read(config_bam)
     cluster_by_exon_composition(config_bam, count_dict)
+

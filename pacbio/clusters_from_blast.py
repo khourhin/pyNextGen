@@ -5,11 +5,6 @@ import pysam
 import os
 import logging
 
-config_blastout = "/home/ekornobis/analysis/allemand/v1/unmapped_blast/blastn_short_sup28.out"
-config_fasta = "/home/ekornobis/analysis/allemand/clusters/clus_iso_0000000000000000000000000000000.fas"
-config_outfolder = "blast_cluster_out_sup28"
-config_fig_clust_hist = "clust_hist2.png"
-
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -75,6 +70,13 @@ def get_fastas_from_clusters(in_fasta, clus_dict):
 
 if __name__ == "__main__":
 
+    # The blast output in outfmt 6
+    config_blastout = sys.argv[1]
+    # The fasta file to cluster
+    config_fasta = sys.argv[2]
+    config_outfolder = "blast_clus2"
+    config_fig_clust_hist = "clust_hist2.png"
+    
     clus_dict = get_clusters_from_blast(config_blastout)
     get_cluster_stat(clus_dict)
     get_fastas_from_clusters(config_fasta, clus_dict)
