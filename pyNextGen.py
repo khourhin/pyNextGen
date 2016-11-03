@@ -18,12 +18,12 @@ def fastq_stats(fastqs):
     bfq.print_all_stats(fastqs)
 
 
-def blast_clustering(blastout, fasta, bam):
+def blast_clustering(blastout, fasta, bam, nExons):
 
     clus_dict = cfb.get_clusters_from_blast(blastout)
     cfb.get_cluster_stat(clus_dict)
-#    get_fastas_from_clusters(config_fasta, clus_dict)
-    cfb.get_bams_from_cluster(bam, clus_dict)
+#    cfb.get_fastas_from_clusters(fasta, clus_dict, nExons)
+    cfb.get_bams_from_cluster(bam, clus_dict, nExons)
 
 if __name__ == "__main__":
 
@@ -38,4 +38,5 @@ if __name__ == "__main__":
     # The fasta file to cluster
     fasta = sys.argv[2]
     bam = sys.argv[3]
+    nExons = sys.argv[4]
     blast_clustering(blastout, fasta, bam)

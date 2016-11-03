@@ -7,6 +7,9 @@ import logging
 import sys
 import basics_bam as bb
 
+######## BADDDDDDDDDD
+#### CHANGE THE RANGE IN GET_ISOFORM CODE for it to be dynamic
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -14,10 +17,10 @@ config_fig_clust_hist='test.png'
 config_fasout_dir='clusters_fas'
 config_bamout_dir='clusters_bam'
 
-def get_isoform_code(exon_list):
+def get_isoform_code(exon_list, nExons):
 
     exon_l = [int(x.strip("exon")) - 1 for x in exon_list]
-    isoform = [1 if x in exon_l else 0 for x in range(31)]
+    isoform = [1 if x in exon_l else 0 for x in range(nExons)]
     return isoform
 
 
@@ -59,16 +62,16 @@ def get_cluster_stat(clus_dict):
     print len(clusters_sup1)
 
     
-def get_fastas_from_clusters(in_fasta, clus_dict):
+def get_fastas_from_clusters(in_fasta, clus_dict, nExons):
 
     os.makedirs(config_fasout_dir)
     
     for clus_name in clus_dict:
+        clus_size = len(clus_dict[clus_name])
         fas_out = os.path.join(config_fasout_dir,
                                "clus_{0}_{1}seqs.fas".format("".join(str(x)
                                                                      for x in get_isoform_code(clus_name)),
                                                              clus_size))
-        clus_size = len(clus_dict[clus_name])
 
         with open(fas_out, 'w') as fout:
             
@@ -78,10 +81,18 @@ def get_fastas_from_clusters(in_fasta, clus_dict):
                         fout.write(">" + seq.name + "\n")
                         fout.write(seq.sequence + "\n")
 
-                        
-def get_bams_from_cluster(in_bam, clus_dict):
+
+def get_bams_from_cluster(bam_in, clus_dict, nExons):
 
     os.makedirs(config_bamout_dir)
-    
+
     for clus_name in clus_dict:
-        print clus_dict[clus_name]
+        clus_size = len(clus_dict[clus_name])
+        bam_out = os.path.join(config_bamout_dir,
+                               "clus_{0}_{1}seqs.bam".format("".join(str(x)
+                                                                     for x in get_isoform_code(clus_name)),
+                                                             clus_size))
+
+        read_sel = bb.get_read_by_id(clus_dict[clus_name], bam_in)
+        bb.print_bam(read_sel, bam_in, bam_out)
+

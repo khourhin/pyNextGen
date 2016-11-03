@@ -21,7 +21,7 @@ def get_read_by_id(id_list, bam):
     return read_sel
 
 
-def print_bam(read_list, bam_in, bam_out):
+def print_bam(read_sel, bam_in, bam_out):
     """
     From a list of pysam reads, write out a bam file. bam_in is used
     only for its header.
@@ -29,5 +29,5 @@ def print_bam(read_list, bam_in, bam_out):
 
     with pysam.AlignmentFile(bam_out, 'wb',
                              template=pysam.AlignmentFile(bam_in)) as bam_out:
-        for rd in read_list:
+        for rd in read_sel:
             bam_out.write(rd)
