@@ -4,9 +4,15 @@ import numpy as np
 import pysam
 import os
 import logging
+import sys
+import basics_bam as bb
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+config_fig_clust_hist='test.png'
+config_fasout_dir='clusters_fas'
+config_bamout_dir='clusters_bam'
 
 def get_isoform_code(exon_list):
 
@@ -47,6 +53,7 @@ def get_clusters_from_blast(blast_out):
     
     return clus_dict
 
+
 def get_cluster_stat(clus_dict):
     clusters_sup1 = [clus for clus in clus_dict if len(clus_dict[clus]) > 1]
     print len(clusters_sup1)
@@ -54,11 +61,14 @@ def get_cluster_stat(clus_dict):
     
 def get_fastas_from_clusters(in_fasta, clus_dict):
 
-    os.makedirs(config_outfolder)
+    os.makedirs(config_fasout_dir)
     
     for clus_name in clus_dict:
+        fas_out = os.path.join(config_fasout_dir,
+                               "clus_{0}_{1}seqs.fas".format("".join(str(x)
+                                                                     for x in get_isoform_code(clus_name)),
+                                                             clus_size))
         clus_size = len(clus_dict[clus_name])
-        fas_out = os.path.join(config_outfolder, "clus_{0}_{1}seqs.fas".format("".join(str(x) for x in get_isoform_code(clus_name)), clus_size))
 
         with open(fas_out, 'w') as fout:
             
@@ -68,16 +78,10 @@ def get_fastas_from_clusters(in_fasta, clus_dict):
                         fout.write(">" + seq.name + "\n")
                         fout.write(seq.sequence + "\n")
 
-if __name__ == "__main__":
+                        
+def get_bams_from_cluster(in_bam, clus_dict):
 
-    # The blast output in outfmt 6
-    config_blastout = sys.argv[1]
-    # The fasta file to cluster
-    config_fasta = sys.argv[2]
-    config_outfolder = "blast_clus2"
-    config_fig_clust_hist = "clust_hist2.png"
+    os.makedirs(config_bamout_dir)
     
-    clus_dict = get_clusters_from_blast(config_blastout)
-    get_cluster_stat(clus_dict)
-    get_fastas_from_clusters(config_fasta, clus_dict)
-    
+    for clus_name in clus_dict:
+        print clus_dict[clus_name]
