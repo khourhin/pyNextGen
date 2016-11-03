@@ -2,6 +2,10 @@ import pysam
 
 # IN DVPT
 
+# get_read_by_id is HIGHLY SUBOPTIMAL (found some index methods in
+# pysam but did not manage to make it work to accelerate the acces to
+# read by names)
+
 
 def get_read_by_id(id_list, bam):
     """
