@@ -70,7 +70,7 @@ def get_fastas_from_clusters(in_fasta, clus_dict, nExons):
         clus_size = len(clus_dict[clus_name])
         fas_out = os.path.join(config_fasout_dir,
                                "clus_{0}_{1}seqs.fas".format("".join(str(x)
-                                                                     for x in get_isoform_code(clus_name)),
+                                                                     for x in get_isoform_code(clus_name, nExons)),
                                                              clus_size))
 
         with open(fas_out, 'w') as fout:
@@ -90,7 +90,7 @@ def get_bams_from_cluster(bam_in, clus_dict, nExons):
         clus_size = len(clus_dict[clus_name])
         bam_out = os.path.join(config_bamout_dir,
                                "clus_{0}_{1}seqs.bam".format("".join(str(x)
-                                                                     for x in get_isoform_code(clus_name)),
+                                                                     for x in get_isoform_code(clus_name, nExons)),
                                                              clus_size))
 
         read_sel = bb.get_read_by_id(clus_dict[clus_name], bam_in)

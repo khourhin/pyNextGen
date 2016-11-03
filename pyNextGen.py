@@ -38,5 +38,5 @@ if __name__ == "__main__":
     # The fasta file to cluster
     fasta = sys.argv[2]
     bam = sys.argv[3]
-    nExons = sys.argv[4]
-    blast_clustering(blastout, fasta, bam)
+    nExons = int(sys.argv[4])
+    blast_clustering(blastout, fasta, bam, nExons)
