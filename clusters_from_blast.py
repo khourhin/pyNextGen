@@ -59,7 +59,7 @@ def get_clusters_from_blast(blast_out):
 
 def get_cluster_stat(clus_dict):
     clusters_sup1 = [clus for clus in clus_dict if len(clus_dict[clus]) > 1]
-    print len(clusters_sup1)
+    log.info("Number of blast clusters generated: {}".format(len(clusters_sup1)))
 
     
 def get_fastas_from_clusters(in_fasta, clus_dict, nExons):

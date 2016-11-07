@@ -3,7 +3,7 @@
 import logging
 import basics_fastq as bfq
 import sys
-from pacbio import clusters_from_blast as cfb
+import clusters_from_blast as cfb
 
 
 # Checked 'click' library for parameters handling. Sounds super cool
@@ -13,7 +13,6 @@ from pacbio import clusters_from_blast as cfb
 
 # TODO Use threading
 
-
 def fastq_stats(fastqs):
     bfq.print_all_stats(fastqs)
 
@@ -22,8 +21,8 @@ def blast_clustering(blastout, fasta, bam, nExons):
 
     clus_dict = cfb.get_clusters_from_blast(blastout)
     cfb.get_cluster_stat(clus_dict)
-#    cfb.get_fastas_from_clusters(fasta, clus_dict, nExons)
-    cfb.get_bams_from_cluster(bam, clus_dict, nExons)
+    cfb.get_fastas_from_clusters(fasta, clus_dict, nExons)
+#    cfb.get_bams_from_cluster(bam, clus_dict, nExons)
 
 if __name__ == "__main__":
 
