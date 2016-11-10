@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # Fastq Stats
     # fastq_stats(sys.argv[1:])
 
+    # Example for blast clustering
     # The blast output in outfmt 6
     blastout = sys.argv[1]
     # The fasta file to cluster

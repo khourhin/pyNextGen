@@ -13,9 +13,6 @@ import basics_bam as bb
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-config_fig_clust_hist='test.png'
-config_fasout_dir='blast_clusters_fas'
-config_bamout_dir='blast_clusters_bam'
 
 def get_isoform_code(exon_list, nExons):
 
@@ -96,4 +93,20 @@ def get_bams_from_cluster(bam_in, clus_dict, nExons):
         read_sel = bb.get_read_by_id(clus_dict[clus_name], bam_in)
         bb.print_bam(read_sel, bam_in, bam_out)
 
-# MAIN is in pyNextGen
+if __name__ == "__main__":
+    
+    # The blast output in outfmt 6
+    blastout = sys.argv[1]
+    # The fasta file to cluster
+    fasta = sys.argv[2]
+    bam = sys.argv[3]
+    nExons = int(sys.argv[4])
+
+    config_fig_clust_hist='test.png'
+    config_fasout_dir= blastout + '_clusters_fas'
+    config_bamout_dir= blastout + '_clusters_bam'
+    
+    clus_dict = get_clusters_from_blast(blastout)
+    get_cluster_stat(clus_dict)
+    get_fastas_from_clusters(fasta, clus_dict, nExons)
+
