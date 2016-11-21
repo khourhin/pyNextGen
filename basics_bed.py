@@ -30,10 +30,9 @@ def get_random_intervals(in_bed, n, min_size, max_size):
             try:
                 r_start = random.randint(int(start), int(end) - r_size)
                 r_end = r_start + r_size
-                
-            # If base interval smaller than desired length, return complete interval
+
+                # If base interval smaller than desired length, return complete interval
             except ValueError as e:
-                print e
                 r_start = start
                 r_end = end
             
@@ -44,4 +43,4 @@ if __name__ == "__main__":
 
     in_bed = sys.argv[1]
     
-    get_random_intervals(in_bed, 270, 520, 4469)
+    get_random_intervals(in_bed, 2000, 520, 4469)
