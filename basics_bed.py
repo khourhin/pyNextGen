@@ -24,32 +24,26 @@ class BedInterval():
     def __repr__(self):
         return "{0}\t{1}\t{2}".format(self.chrom, self.start, self.end)
 
-    
-def bed_to_list(bedfile):
-    """
-    Return a list from a bedfile, 1 item = 1 line
-    """
-    bed = []
-    with open(bedfile, 'r') as f:
-        bed = [BedInterval(line.split()) for line in f]
 
-    return bed
+class BedFile():
+    def __init__(self, bedfile):
+        self.intervals = [BedInterval(line.split())
+                          for line in open(bedfile, 'r')]
+        self.name = bedfile
 
+    def rand_interval(self, min_size=None):
+        """
+        Return an randomly chose interval from a bed list.  If min_size is
+        specified, intervals will be sampled until they can form an
+        interval of minimal size min_size
+        """
 
-def get_interval(bed_list, min_size=None):
-    """
-    Return an randomly chose interval from a bed list.  If min_size is
-    specified, intervals will be sampled until they can form an
-    interval of minimal size min_size
-    """
+        sel_int = random.choice(self.intervals)
+        if min_size:
+            while sel_int.length < min_size:
+                sel_int = random.choice(self.intervals)
 
-    sel_int = random.choice(bed_list)
-    if min_size:
-        while sel_int.length < min_size:
-            sel_int = random.choice(bed_list)
-
-    return sel_int
-
+        return sel_int
 
 
 if __name__ == "__main__":
@@ -62,10 +56,10 @@ if __name__ == "__main__":
     ref_bed = sys.argv[1]
     sampled_bed = sys.argv[2]
 
-    ref_bed = bed_to_list(ref_bed)
-    sampled_bed = bed_to_list(sampled_bed)
+    ref_bed = BedFile(ref_bed)
+    sampled_bed = BedFile(sampled_bed)
 
-    for inter in ref_bed:
-        sample = get_interval(sampled_bed, inter.length)
+    for inter in ref_bed.intervals:
+        sample = sampled_bed.rand_interval(inter.length)
         print(sample.rand_cut(inter.length))
         
