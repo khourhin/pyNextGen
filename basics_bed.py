@@ -1,6 +1,12 @@
 # remember that pybedtools exists !!
+import logging
 import random
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 
 class BedInterval():
@@ -45,6 +51,24 @@ class BedFile():
 
         return sel_int
 
+    def get_stats(self):
+        """
+        Get stats on the bed file
+        """
+        inters_len = [inter.length for inter in self.intervals]
+        stats = {
+            'nInt': len(self.intervals),
+            'minLen': min(inters_len),
+            'maxLen': max(inters_len),
+            'meanLen': np.mean(inters_len),
+            'medianLen': np.median(inters_len),
+        }
+        
+        return stats
+
+    def __repr__(self):
+        return "Bedfile Object for file {}".format(self.name)
+
 
 if __name__ == "__main__":
 
@@ -63,3 +87,5 @@ if __name__ == "__main__":
         sample = sampled_bed.rand_interval(inter.length)
         print(sample.rand_cut(inter.length))
         
+
+    
