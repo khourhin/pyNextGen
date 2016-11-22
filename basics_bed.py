@@ -1,46 +1,71 @@
-# This is to remember that pybedtools exists !!
-from pybedtools import BedTool
+# remember that pybedtools exists !!
 import random
 import sys
 
 
-# Dirty function ! TO cleanup !
-def get_random_intervals(in_bed, n, min_size, max_size):
+class BedInterval():
+    def __init__(self, bedline_list):
+        self.chrom = bedline_list[0]
+        self.start = int(bedline_list[1])
+        self.end = int(bedline_list[2])
+        self.length = self.end - self.start
+
+    def rand_cut(self, fragl):
+        """
+        Cut a random fragment fo length "fragl" from the interval
+        """
+        try:
+            c_start = random.randint(self.start, self.end - fragl)
+        except ValueError as e:
+            raise(e)
+
+        return BedInterval([self.chrom, c_start, c_start + fragl])
+
+    def __repr__(self):
+        return "{0}\t{1}\t{2}".format(self.chrom, self.start, self.end)
+
+    
+def bed_to_list(bedfile):
     """
-    Get a bed with n random intervals extracted from the intervals
-    present in in_bed. Random intervals generated will have a size
-    between min_size and max_size
+    Return a list from a bedfile, 1 item = 1 line
+    """
+    bed = []
+    with open(bedfile, 'r') as f:
+        bed = [BedInterval(line.split()) for line in f]
+
+    return bed
+
+
+def get_interval(bed_list, min_size=None):
+    """
+    Return an randomly chose interval from a bed list.  If min_size is
+    specified, intervals will be sampled until they can form an
+    interval of minimal size min_size
     """
 
-    # Randomly select lines from the in_bed
-    num_lines = sum(1 for line in open(in_bed, 'r'))
-    line_sel = random.sample(range(num_lines), n)
+    sel_int = random.choice(bed_list)
+    if min_size:
+        while sel_int.length < min_size:
+            sel_int = random.choice(bed_list)
 
-    with open(in_bed, 'r') as f:
-        lcount = 0
-        for line in f:
-            if lcount not in line_sel:
-                lcount += 1
-                continue
+    return sel_int
 
-            chrom, start, end = line.split()[:3]
 
-            # Define the random interval
-            r_size = random.randint(min_size, max_size)
-            try:
-                r_start = random.randint(int(start), int(end) - r_size)
-                r_end = r_start + r_size
-
-                # If base interval smaller than desired length, return complete interval
-            except ValueError as e:
-                r_start = start
-                r_end = end
-            
-            print("{0}\t{1}\t{2}".format(chrom, r_start, r_end))
-            lcount += 1
 
 if __name__ == "__main__":
 
-    in_bed = sys.argv[1]
-    
-    get_random_intervals(in_bed, 2000, 520, 4469)
+    # From 2 beds:
+    # Get the lengths of the intervals in ref_bed
+    # Produce random intervals from sampled_bed with
+    # same lengths as ref_bed intervals
+
+    ref_bed = sys.argv[1]
+    sampled_bed = sys.argv[2]
+
+    ref_bed = bed_to_list(ref_bed)
+    sampled_bed = bed_to_list(sampled_bed)
+
+    for inter in ref_bed:
+        sample = get_interval(sampled_bed, inter.length)
+        print(sample.rand_cut(inter.length))
+        
