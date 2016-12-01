@@ -106,16 +106,25 @@ def get_cluster_stat(clus_dict):
     log.info("Number of blast clusters generated: {}".format(len(clusters_sup1)))
 
     
-def get_fastas_from_clusters(in_fasta, clus_dict, nExons):
+def get_fastas_from_clusters(in_fasta, clus_dict, nExons=None):
 
     os.makedirs(config_fasout_dir)
     
     for clus_name in clus_dict:
         clus_size = len(clus_dict[clus_name])
-        fas_out = os.path.join(config_fasout_dir,
-                               "clus_{0}_{1}seqs.fas".format("".join(str(x)
-                                                                     for x in get_isoform_code(clus_name, nExons)),
-                                                             clus_size))
+        
+        # If clusters have been defined by exon composition (get_clusters_from_blast)
+        if nExons:
+            iso_codes = get_isoform_code(clus_name, nExons)
+            fas_out = os.path.join(config_fasout_dir,
+                                   "clus_{0}_{1}seqs.fas".format("".join(str(x)
+                                                                         for x in iso_codes), clus_size))
+            
+        # If clusters have been defined by transcripts hit (get_clusters_from_transcript_blast)
+        else:
+            fas_out = os.path.join(
+                config_fasout_dir,
+                "clus_{0}_{1}seqs.fas".format(clus_name, clus_size))
 
         with open(fas_out, 'w') as fout:
             
@@ -140,6 +149,7 @@ def get_bams_from_cluster(bam_in, clus_dict, nExons):
         read_sel = bb.get_read_by_id(clus_dict[clus_name], bam_in)
         bb.print_bam(read_sel, bam_in, bam_out)
 
+
 if __name__ == "__main__":
     
     # The blast output in outfmt 6
@@ -154,9 +164,9 @@ if __name__ == "__main__":
     config_bamout_dir= blastout + '_clusters_bam'
 
     # Cluster from exon blast
-    #    clus_dict = get_clusters_from_blast(blastout)
-    #    get_cluster_stat(clus_dict)
-    #    get_fastas_from_clusters(fasta, clus_dict, nExons)
+    # clus_dict = get_clusters_from_blast(blastout)
+    # get_cluster_stat(clus_dict)
+    # get_fastas_from_clusters(fasta, clus_dict, nExons)
 
     # Cluster from transcript blast
     clus_dict = get_clusters_from_transcript_blast(blastout)
