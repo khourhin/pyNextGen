@@ -22,6 +22,12 @@ def get_isoform_code(exon_list, nExons):
 
 
 def get_clusters_from_blast(blast_out):
+    """
+    From blastn results against a db of exons returns a dictionary:
+    key: exon composition (in format '01011101...')
+    value: list of seqids with this exon composition
+    """
+    
     res_dict = {}
     
     with open(blast_out) as f:
@@ -54,7 +60,48 @@ def get_clusters_from_blast(blast_out):
     return clus_dict
 
 
+def get_clusters_from_transcript_blast(blastout):
+    """
+    From blastn results against a db of assembled transcripts returns
+    a dictionary:
+    key: ref transcript id
+    value: list of seqids which have a best hit against this transcript
+
+    This assumes (it was checked first) that the first hit is always the 
+    best according to bitscore
+    """
+
+    seq_dict={}
+
+    for line in open(blastout, 'r'):
+        seq_id = line.split()[0]
+        hit_id = line.split()[1]
+
+        # Takes only the first hits
+        if seq_id not in seq_dict:
+            seq_dict[seq_id] = hit_id
+
+    # Inverting the dict to have clus_name -> [seqs]
+    print("INverting dict")
+    clus_dict = {}
+    for k, v in seq_dict.iteritems():
+        clus_dict[v] = clus_dict.get(v, [])
+        clus_dict[v].append(k)
+
+    log.info('# Clusters: {}'.format(len(clus_dict)))
+
+    a = set(range(1,124))
+    b = set([int(k.split('_')[1]) for k in clus_dict])
+
+    print a - b
+
+    return clus_dict
+
 def get_cluster_stat(clus_dict):
+    """
+    Produce statistics from a cluster dict obtained by get_clusters_from_blast
+    """
+    
     clusters_sup1 = [clus for clus in clus_dict if len(clus_dict[clus]) > 1]
     log.info("Number of blast clusters generated: {}".format(len(clusters_sup1)))
 
@@ -99,14 +146,18 @@ if __name__ == "__main__":
     blastout = sys.argv[1]
     # The fasta file to cluster
     fasta = sys.argv[2]
-    bam = sys.argv[3]
-    nExons = int(sys.argv[4])
+#    bam = sys.argv[3]
+#    nExons = int(sys.argv[4])
 
     config_fig_clust_hist='test.png'
     config_fasout_dir= blastout + '_clusters_fas'
     config_bamout_dir= blastout + '_clusters_bam'
-    
-    clus_dict = get_clusters_from_blast(blastout)
-    get_cluster_stat(clus_dict)
-    get_fastas_from_clusters(fasta, clus_dict, nExons)
 
+    # Cluster from exon blast
+    #    clus_dict = get_clusters_from_blast(blastout)
+    #    get_cluster_stat(clus_dict)
+    #    get_fastas_from_clusters(fasta, clus_dict, nExons)
+
+    # Cluster from transcript blast
+    clus_dict = get_clusters_from_transcript_blast(blastout)
+    get_fastas_from_clusters(fasta, clus_dict)
