@@ -30,13 +30,13 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     # Fastq Stats
-    # fastq_stats(sys.argv[1:])
+    fastq_stats(sys.argv[1:])
 
     # Example for blast clustering
     # The blast output in outfmt 6
-    blastout = sys.argv[1]
+    #blastout = sys.argv[1]
     # The fasta file to cluster
-    fasta = sys.argv[2]
-    bam = sys.argv[3]
-    nExons = int(sys.argv[4])
-    blast_clustering(blastout, fasta, bam, nExons)
+    #fasta = sys.argv[2]
+    #bam = sys.argv[3]
+    #nExons = int(sys.argv[4])
+    #blast_clustering(blastout, fasta, bam, nExons)

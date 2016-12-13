@@ -90,11 +90,6 @@ def get_clusters_from_transcript_blast(blastout):
 
     log.info('# Clusters: {}'.format(len(clus_dict)))
 
-    a = set(range(1,124))
-    b = set([int(k.split('_')[1]) for k in clus_dict])
-
-    print a - b
-
     return clus_dict
 
 def get_cluster_stat(clus_dict):
@@ -156,18 +151,18 @@ if __name__ == "__main__":
     blastout = sys.argv[1]
     # The fasta file to cluster
     fasta = sys.argv[2]
-#    bam = sys.argv[3]
-#    nExons = int(sys.argv[4])
+    bam = sys.argv[3]
+    nExons = int(sys.argv[4])
 
     config_fig_clust_hist='test.png'
     config_fasout_dir= blastout + '_clusters_fas'
     config_bamout_dir= blastout + '_clusters_bam'
 
     # Cluster from exon blast
-    # clus_dict = get_clusters_from_blast(blastout)
-    # get_cluster_stat(clus_dict)
-    # get_fastas_from_clusters(fasta, clus_dict, nExons)
+    clus_dict = get_clusters_from_blast(blastout)
+    get_cluster_stat(clus_dict)
+    get_fastas_from_clusters(fasta, clus_dict, nExons)
 
     # Cluster from transcript blast
-    clus_dict = get_clusters_from_transcript_blast(blastout)
-    get_fastas_from_clusters(fasta, clus_dict)
+    # clus_dict = get_clusters_from_transcript_blast(blastout)
+    # get_fastas_from_clusters(fasta, clus_dict)

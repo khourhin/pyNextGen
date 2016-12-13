@@ -63,7 +63,6 @@ class BedFile():
             'meanLen': np.mean(inters_len),
             'medianLen': np.median(inters_len),
         }
-        
         return stats
 
     def __repr__(self):
@@ -86,6 +85,3 @@ if __name__ == "__main__":
     for inter in ref_bed.intervals:
         sample = sampled_bed.rand_interval(inter.length)
         print(sample.rand_cut(inter.length))
-        
-
-    
