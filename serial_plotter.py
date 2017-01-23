@@ -2,9 +2,6 @@ from bokeh.charts import Bar, Histogram, output_file, show
 import sys
 import pandas as pd
 import argparse
-import q
-import types
-from collections import Counter
 
 # WARNINGS !!!
 # NOW working with only one column (for hist)
@@ -18,13 +15,12 @@ def hist(data):
     show(hist_plot)
 
 def bar_hist(data):
-    
-    d = data['a'].value_counts()
-    print(d)
+
+    d = data['a'].value_counts().sort_values(ascending=False)
+    print(d.head(5))
     hist_plot = Bar(d, legend=None)
     output_file('/tmp/serial_plotter_plot.html', title='Serial Plotter plot')
     show(hist_plot)
-
     
 def get_input(sep):
     """
@@ -35,8 +31,9 @@ def get_input(sep):
 
     # Rename columns (necessary visibly to have column names for bokeh)
     df.columns = list('abcdefghijklmnopqrstuvwxyz'[:len(df.columns)])
+
     
-    print(df)
+    print(df.head())
     return df
 
 
