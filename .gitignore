@@ -2,5 +2,5 @@
 *.pyc
 /__init__.py
 /demo_data
+/demo_out
 /snake_make_recipes/.snake*
-

@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import os
+import argparse
 
 # For starter only work with single reads
 
@@ -53,11 +54,12 @@ def star_align_1pass(gfas, gtf, read_list1, nthreads):
 
     for rd in read_list1:
         outdir = 'star_out'
+        
         if os.path.exists(outdir):
             raise IOError("The directory {} already exists. To not overwrite it, Star alignment is canceled.".format(outdir))
-
         os.makedirs(outdir)
         prefix = os.path.join(outdir, os.path.splitext(os.path.basename(rd))[0])
+        log.info("Starting mapping read:{}".format(rd))
         cmd = ('STAR '
                '--genomeDir {0} '
                '--sjdbGTFfile {1} '               
@@ -68,13 +70,19 @@ def star_align_1pass(gfas, gtf, read_list1, nthreads):
         log.info('Executing cmd:' + cmd)
 
         p = subprocess.check_output(cmd, shell=True)
-        print(p)
+        log.info(p)
+
 
 if __name__ == '__main__':
 
-    GFAS = '/home/ekornobis/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.dna_sm.toplevel.fa'
-    NTHREADS = 20
-    READS=['/home/ekornobis/data/demo_data/illumina/c_elegans/SRR019721.fastq']
-    GTF = '/home/ekornobis/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.86.gtf'
+    parser = argparse.ArgumentParser()
+    parser.add_argument("genome_fas")
+    parser.add_argument("gtf")
+    parser.add_argument("read_file", nargs="+")
+    parser.add_argument("--threads", '-t', default=1)
+    args = parser.parse_args()
 
-    star_align_1pass(GFAS, GTF, READS, NTHREADS)
+    star_align_1pass(args.genome_fas, args.gtf, args.read_file, args.threads)
+
+    # Usage example:
+    # python alternative_splicing.py ~/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.dna_sm.toplevel.fa ~/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.86.gtf ~/data/demo_data/c_elegans/illumina/SRR019721.fastq -t 20
