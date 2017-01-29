@@ -1,0 +1,30 @@
+OUTFOLDER = "/home/khourhin/Programming/playground"
+
+SAMPLE = ["SRR019721", "SRR019722", "SRR019723", "SRR019724", "SRR019725"]
+
+rule targets:
+    input:
+        #"/home/khourhin/data/genomes/c_elegans/star_index"
+        expand("{out}/mapped_reads/{sample}_Aligned.sortedByCoord.out.bam", out=OUTFOLDER, sample=SAMPLE)
+
+rule make_index:
+    input:
+        fas="/home/khourhin/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.dna_sm.toplevel.fa",
+    output:
+        idx_dir="/home/khourhin/data/genomes/c_elegans/star_index"
+    params:
+        threads=4    
+    shell:
+        "mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} --runThreadN {params.threads}"
+
+rule pass1:
+    input:
+        gtf="/home/khourhin/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.87.gtf",
+        idx_dir="/home/khourhin/data/genomes/c_elegans/star_index",
+        reads="/home/khourhin/data/demo_data/c_elegans/{sample}.fastq.gz",
+    output:
+        "{OUTFOLDER}/mapped_reads/{sample}_Aligned.sortedByCoord.out.bam"
+    params:
+        threads=4
+    shell:
+        "STAR --genomeDir {input.idx_dir} --readFilesIn {input.reads} --sjdbGTFfile {input.gtf} --outFileNamePrefix {OUTFOLDER}/mapped_reads/{wildcards.sample}_ --outSAMtype BAM SortedByCoordinate --runThreadN {params.threads} --readFilesCommand zcat"
