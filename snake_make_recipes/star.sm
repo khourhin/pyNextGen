@@ -1,3 +1,5 @@
+# USAGE
+
 OUTFOLDER = "/home/khourhin/Programming/playground"
 
 SAMPLE = ["SRR019721", "SRR019722", "SRR019723", "SRR019724", "SRR019725"]
