@@ -1,0 +1,66 @@
+# USAGE
+#snakemake --cores 20 -s star.sm
+
+# ASSUMPTIONS:
+# PAIRED READS named *_[12].fastq.gz
+
+OUTFOLDER = "/home/ekornobis/Programming/playground"
+
+#SAMPLE = ["SRR019721", "SRR019722", "SRR019723", "SRR019724", "SRR019725"]
+SAMPLE = ["SRR019721_small", "SRR019722_small", "SRR019723_small", "SRR019724_small", "SRR019725_small"]
+
+rule targets:
+    input:
+        #"/home/ekornobis/data/genomes/c_elegans/star_index"
+        expand("{out}/mapped_reads/{sample}_pass2_Aligned.sortedByCoord.out.bam", out=OUTFOLDER, sample=SAMPLE),
+#        expand("{out}/mapped_reads/{sample}_SJ.out.tab", out=OUTFOLDER, sample=SAMPLE),
+#        expand("{out}/mapped_reads/total_SJ.tab", out=OUTFOLDER),
+
+rule make_index:
+    input:
+        fas="/home/ekornobis/data/genomes/c_elegans/Caenorhabditis_elegans.WBcel235.dna_sm.toplevel.fa",
+    output:
+        idx_dir="/home/ekornobis/data/genomes/c_elegans/star_index"
+    params:
+        threads=20
+    shell:
+        "mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} --runThreadN {params.threads}"
+
+rule pass1:
+    input:
+        gtf="/home/ekornobis/data/genomes/ensembl/c_elegans/Caenorhabditis_elegans.WBcel235.87.gtf",
+        idx_dir="/home/ekornobis/data/genomes/ensembl/c_elegans/star_index",
+        read1="/home/ekornobis/data/demo/c_elegans/{sample}_1.fastq.gz",
+        read2="/home/ekornobis/data/demo/c_elegans/{sample}_2.fastq.gz",
+    output:
+        "{OUTFOLDER}/mapped_reads/{sample}_pass1_Aligned.sortedByCoord.out.bam",
+        "{OUTFOLDER}/mapped_reads/{sample}_pass1_SJ.out.tab"
+        
+    params:
+        threads=20
+    shell:
+        "STAR --genomeDir {input.idx_dir} --readFilesIn {input.read1} {input.read2} --sjdbGTFfile {input.gtf} --outFileNamePrefix {OUTFOLDER}/mapped_reads/{wildcards.sample}_pass1_ --outSAMtype BAM SortedByCoordinate --runThreadN {params.threads} --readFilesCommand zcat"
+
+rule merge_SJ_files:
+    input:
+        expand('{out}/mapped_reads/{sample}_SJ.out.tab', out=OUTFOLDER, sample=SAMPLE)
+    output:
+        txt="{OUTFOLDER}/mapped_reads/total_SJ.tab"
+    shell:
+        'cat {input} > {output}'
+
+rule pass2:
+    input:
+        gtf="/home/ekornobis/data/genomes/ensembl/c_elegans/Caenorhabditis_elegans.WBcel235.87.gtf",
+        idx_dir="/home/ekornobis/data/genomes/ensembl/c_elegans/star_index",
+        read1="/home/ekornobis/data/demo/c_elegans/{sample}_1.fastq.gz",
+        read2="/home/ekornobis/data/demo/c_elegans/{sample}_2.fastq.gz",
+        sj = '{OUTFOLDER}/mapped_reads/total_SJ.tab'
+    output:
+        "{OUTFOLDER}/mapped_reads/{sample}_pass2_Aligned.sortedByCoord.out.bam",
+        "{OUTFOLDER}/mapped_reads/{sample}_pass2_SJ.out.tab"
+        
+    params:
+        threads=20
+    shell:
+        "STAR --genomeDir {input.idx_dir} --readFilesIn {input.read1} {input.read2} --sjdbGTFfile {input.gtf} --quantMode GeneCounts --sjdbFileChrStartEnd {input.sj} --outFileNamePrefix {OUTFOLDER}/mapped_reads/{wildcards.sample}_pass2_ --outSAMtype BAM SortedByCoordinate --runThreadN {params.threads} --readFilesCommand zcat"
