@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 import logging
 import basics_fastq as bfq
 import sys
