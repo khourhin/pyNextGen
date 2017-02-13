@@ -1,4 +1,5 @@
 ## from Law et al 2016 in F1000Research
+# Also used in Li et.al 2014 Nat.Bioteck
 ## RNA-seq analysis is easy as 1-2-3 with limma, Glimma and edgeR
 
 ## THIS FILE IS NOT A SCRIPT !!!!
