@@ -22,7 +22,7 @@ def ensemblGO_to_rtopGO(mart_export):
             GO_map[transcript_name] = GO_map.get(transcript_name, []) + [go_term]
             
     for k in GO_map:
-        sys.stdout.write('{0}\t{1}\n'.format(k, '\t'.join(GO_map[k])))
+        sys.stdout.write('{0}\t{1}\n'.format(k, ', '.join(GO_map[k])))
 
     sys.stderr.write('{} transcripts did not have any GO term.\n'.format(len(no_GOs)))
 
