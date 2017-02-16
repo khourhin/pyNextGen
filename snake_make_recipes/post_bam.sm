@@ -1,0 +1,36 @@
+# USAGE
+#snakemake --cores 20 -s star.sm
+
+# ASSUMPTIONS
+#
+
+################################################################################
+#	STUBBY STUB !!!!!                                                      #
+################################################################################
+
+import glob
+import os
+
+OUTFOLDER = 'testing'
+SAMFILES = '/home/ekornobis/analysis/batsche/methyleu/star_out/bams/*.bam'
+GTF = '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg38/Homo_sapiens.GRCh38.87.gtf'
+
+SAMPLE = [ os.path.basename(x).replace('.bam', '')
+           for x in glob.glob(SAMFILES)]
+
+rule targets:
+    input:
+        expand('testing/{sample}', sample=SAMPLE)
+
+rule qorts:
+    input:
+        bam = '/home/ekornobis/analysis/batsche/methyleu/star_out/bams/{sample}.bam',
+        gtf = GTF
+        
+    output:
+        'testing/{sample}'
+        
+    shell:
+        'qorts QC {input.bam} {input.gtf} {output}'
+
+        
