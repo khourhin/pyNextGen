@@ -12,7 +12,7 @@ import glob
 import os
 
 OUTFOLDER = 'testing'
-SAMFILES = '/home/ekornobis/analysis/batsche/methyleu/star_out/bams/*.bam'
+SAMFILES = '/home/ekornobis/Programming/pyNextGen/demo_data/*.bam'
 GTF = '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg38/Homo_sapiens.GRCh38.87.gtf'
 
 SAMPLE = [ os.path.basename(x).replace('.bam', '')
@@ -24,13 +24,13 @@ rule targets:
 
 rule qorts:
     input:
-        bam = '/home/ekornobis/analysis/batsche/methyleu/star_out/bams/{sample}.bam',
+        bam = '/home/ekornobis/Programming/pyNextGen/demo_data/{sample}.bam',
         gtf = GTF
         
     output:
         'testing/{sample}'
         
     shell:
-        'qorts QC {input.bam} {input.gtf} {output}'
+        'qorts -Xmx18000M -Xms5000M QC --singleEnded {input.bam} {input.gtf} {output}'
 
         
