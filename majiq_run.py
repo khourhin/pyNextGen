@@ -69,7 +69,7 @@ genome_path={3}
 
 def main(inp, groups):
             
-    os.makedirs(OUTDIR)
+#    os.makedirs(OUTDIR)
     os.chdir(OUTDIR)
 
     print(inp)
@@ -80,7 +80,7 @@ def main(inp, groups):
     cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(GFF, CONF_FILE, NTHREADS)
     print(cmd)
 
-    subprocess.check_output(cmd, shell=True)
+#    subprocess.check_output(cmd, shell=True)
 
     for grp in groups:
 
@@ -90,11 +90,11 @@ def main(inp, groups):
         
         cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, NTHREADS, grp)
         print(cmd)
-        subprocess.check_output(cmd, shell=True)
+ #       subprocess.check_output(cmd, shell=True)
 
         cmd = 'voila psi psi_{0}/{0}_psigroup.pickle -splice-graphs1 {1} -o voila_{0}'.format(grp, dot_splicegraph)
         print(cmd)
-        subprocess.check_output(cmd, shell=True)
+  #      subprocess.check_output(cmd, shell=True)
 
 
 if __name__ == '__main__':
