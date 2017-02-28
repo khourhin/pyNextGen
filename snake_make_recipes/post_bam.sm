@@ -5,6 +5,10 @@
 # QORTS:
 # reads UNSTRANDED AND PAIRED
 
+# Qorts can ask for a lot of memory if paired with broken pairs (keeps the
+# singletons in memory)
+
+
 ################################################################################
 #	STUBBY STUB !!!!!                                                      #
 ################################################################################
@@ -21,7 +25,7 @@ SAMPLE = [ os.path.basename(x).replace('.bam', '')
 
 rule targets:
     input:
-        expand('testing/{sample}', sample=SAMPLE)
+        expand('qorts/{sample}', sample=SAMPLE)
 
 rule qorts:
     input:
@@ -36,6 +40,6 @@ rule qorts:
         out = 'logs/log.out'
         
     shell:
-        'qorts -Xmx18000M -Xms5000M QC {input.bam} {input.gtf} {output} 1> {log.err} 2> {log.out}'
+        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1> {log.err} 2> {log.out}'
 
         
