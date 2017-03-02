@@ -9,7 +9,8 @@ qortDir = '/home/ekornobis/analysis/batsche/badeg/1.1/qorts/'
 
 
 
-decoder = read.table(sampleData, col.names=c('ID', 'GROUP'))
+decoder = read.table(sampleData, col.names=c('ID', 'GROUP'), stringsAsFactors=FALSE)
+
 countFiles = paste0(qortDir, decoder$ID, '/QC.spliceJunctionAndExonCounts.forJunctionSeq.txt.gz')
 
 ## From qorts
@@ -17,10 +18,17 @@ gff.file = '/home/ekornobis/analysis/batsche/badeg/1.1/qorts/Homo_sapiens.GRCh37
 
 library(JunctionSeq)
 jscs <- runJunctionSeqAnalyses(sample.files = countFiles,
-                               sample.names = decoder$sample.ID,
-                               condition=factor(decoder$group.ID),
+                               sample.names = decoder$ID,
+                               condition=factor(decoder$GROUP),
                                flat.gff.file = gff.file,
-                               nCores = 1,
+                               nCores = 20,
                                analysis.type = "junctionsAndExons"
-                               );
+                               )
+
+writeCompleteResults(jscs,outfile.prefix="./test",save.jscs = TRUE)
+
+buildAllPlots(jscs=jscs,
+              outfile.prefix = "./plots/",
+              use.plotting.device = "png",
+              FDR.threshold = 0.01)
 
