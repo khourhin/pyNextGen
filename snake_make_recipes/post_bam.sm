@@ -4,6 +4,7 @@
 # ASSUMPTIONS
 # QORTS:
 # reads UNSTRANDED AND PAIRED
+# Otherwise --singleEnded
 
 # QUALIMAP
 # reads ARE UNPAIRED
@@ -23,47 +24,47 @@
 import glob
 import os
 
-SAMFILES = 'bams/*.bam'
-GTF = '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg38/Homo_sapiens.GRCh38.87.gtf'
+SAMFILES = config['sams']
+GTF = config['gtf']
 
 SAMPLE = [ os.path.basename(x).replace('.bam', '')
            for x in glob.glob(SAMFILES)]
 
 rule targets:
     input:
-#        expand('qorts/{sample}', sample=SAMPLE)
-        expand('qualimap/{sample}', sample=SAMPLE)
+        expand('qorts/{sample}', sample=SAMPLE)
+#        expand('qualimap/{sample}', sample=SAMPLE)
 
-# rule qorts:
-#     input:
-#         bam = '/home/ekornobis/Programming/pyNextGen/demo_data/{sample}.bam',
-#         gtf = GTF
-        
-#     output:
-#         'testing/{sample}'
-
-#     log:
-#         err = 'logs/qorts_log.err',
-#         out = 'logs/qorts_log.out'
-        
-#     shell:
-#         'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
-
-        
-rule qualimap:
+rule qorts:
     input:
-        bam = 'bams/{sample}.bam',
+        bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
         gtf = GTF
-
-    output:
-        'qualimap/{sample}'
         
-    log:
-        err = 'logs/qualimap_log.err',
-        out = 'logs/qualimap_log.out'
+    output:
+        'qorts/{sample}'
 
+    log:
+        err = 'logs/qorts_log.err',
+        out = 'logs/qorts_log.out'
+        
     shell:
-        'qualimap rnaseq --java-mem-size=30G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
+        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+#        'qorts -Xmx16g -Xms8g QC --singleEnded --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+
+# rule qualimap:
+#     input:
+#         bam = 'bams/{sample}.bam',
+#         gtf = GTF
+
+#     output:
+#         'qualimap/{sample}'
+        
+#     log:
+#         err = 'logs/qualimap_log.err',
+#         out = 'logs/qualimap_log.out'
+
+#     shell:
+#         'qualimap rnaseq --java-mem-size=30G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
         
 # rule featureCount:
 #     input:

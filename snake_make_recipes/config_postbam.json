@@ -1,0 +1,4 @@
+{
+    'sams':'/home/ekornobis/analysis/rachez/hp1g/star_out/bams/*.bam',
+    'gtf':'/home/ekornobis/data/genomes/ensembl/m_musculus/NCBIM37/Mus_musculus.NCBIM37.67.gtf'
+}
