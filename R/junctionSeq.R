@@ -2,6 +2,8 @@
                                         # STUB
 ################################################################################
 
+options(bitmapType="cairo")
+
 ## Decoder is just a table with columns: samplenames, groups
 #sampleData = '/home/ekornobis/analysis/batsche/badeg/1.1/junctionSeq/sample_groups.tab'
 sampleData = '/home/ekornobis/analysis/rachez/hp1g/code/input.tab'
