@@ -1,10 +1,13 @@
 # USAGE
-#snakemake --cores 20 -s star.sm
+# snakemake --cores 4 -s ~/Programming/pyNextGen/snake_make_recipes/post_bam.sm --config sams='bams/SRR22217*' gtf=~/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf
 
 # ASSUMPTIONS
 # QORTS:
 # reads UNSTRANDED AND PAIRED
-# Otherwise --singleEnded
+# Otherwise
+# --singleEnded
+# --stranded
+# --stranded_fr_secondstrand # For reversed stranded ?
 
 # QUALIMAP
 # reads ARE UNPAIRED
@@ -48,8 +51,8 @@ rule qorts:
         out = 'logs/qorts_log.out'
         
     shell:
-        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
-#        'qorts -Xmx16g -Xms8g QC --singleEnded --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+#        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+        'qorts -Xmx16g -Xms8g QC --stranded --singleEnded --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
 
 # rule qualimap:
 #     input:
