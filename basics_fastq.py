@@ -1,9 +1,10 @@
 import logging
 import numpy
 import pysam
-import basics_nuc_seq as bns
 import collections
 import os.path
+import basics_nuc_seq as bns
+from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def fastq_stats(fastq):
     return res_dict
 
 
-def print_all_stats(fastqs_list):
+def print_all_stats(fastqs_list, threads=10):
     """
     Iterate fastq_stats over a list of fastq files.
 
@@ -50,9 +51,9 @@ def print_all_stats(fastqs_list):
 
     res_list = []
 
-    for fq in fastqs_list:
-        res_list.append(fastq_stats(fq))
-
+    p = Pool(threads)
+    res_list = p.map(fastq_stats, [fq for fq in fastqs_list])
+        
     # header
     print(",".join(res_list[0].keys()))
 
