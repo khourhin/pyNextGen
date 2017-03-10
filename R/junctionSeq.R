@@ -1,6 +1,8 @@
 # USAGE
 #Rscript ~/Programming/pyNextGen/R/junctionSeq.R TABLE-SAMPLE-CONDITION.tab QORT-FOLDER/ FLAT-GFF CORR-FILE
 
+# By default, use 20 threads
+
 options(bitmapType="cairo")
 library(JunctionSeq)
 
