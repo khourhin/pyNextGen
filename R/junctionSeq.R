@@ -3,6 +3,8 @@
 
 # By default, use 20 threads
 
+# Check python good_practices pyensembl for creating CORR-FILE
+
 options(bitmapType="cairo")
 library(JunctionSeq)
 
