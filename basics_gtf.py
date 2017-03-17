@@ -1,13 +1,14 @@
 import argparse
 import logging
 import gffutils
+import os
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 # STUB
 
-def create_db(gtf, dbfn='test.db'):
+def create_db(gtf, dbfn):
     """
     From a 'gtf' file, create a 'dbfn' sqlite database.
     """
@@ -25,7 +26,7 @@ def create_db(gtf, dbfn='test.db'):
 
 
 
-def filter_by_attribute(attr_in, dbfn='test.db'):
+def filter_by_attribute(attr_in, dbfn):
     db = gffutils.FeatureDB(dbfn)
 
     for feat in db.all_features():
@@ -41,8 +42,12 @@ def main():
     parser.add_argument('gtf', help='')
     args = parser.parse_args()
 
-    # create_db(args.gtf)
-    filter_by_attribute('protein_coding')
+    # Create db if not in current folder
+    dbfn = os.path.basename(args.gtf) + '.db'
+    if not os.path.isfile(dbfn):
+        create_db(args.gtf, dbfn)
+    
+    filter_by_attribute('protein_coding', dbfn)
 
 if __name__ == '__main__':
     
