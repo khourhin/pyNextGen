@@ -1,0 +1,45 @@
+# USAGE
+# snakemake -s ~/Programming/pyNextGen/snake_make_recipes/freebayes.sm --config bams='/home/ekornobis/data/borja/junco/bams/*.bam' 
+
+# ASSUMPTIONS
+
+import glob
+import os
+
+# The bam folder
+BAMS = config['bams']
+
+SAMPLE = [ os.path.basename(x).replace('.bam', '')
+           for x in glob.glob(BAMS)]
+
+REF = config['ref']
+
+
+# TO ADD
+
+rule targets:
+    input:
+        expand('{sample}_lofreqTreat.bam', sample=SAMPLE)
+
+#rule addReadGroups:
+
+#rule RemoveDups (not sure it's necessary)
+
+
+rule lofreq_preprocessing:
+    input:
+        bam = os.path.dirname(BAMS) + '/{sample}.bam',
+        ref = REF
+
+    output:
+        '{sample}_lofreqTreat.bam'
+
+    log:
+        'lofreq_pre.log'
+        
+    shell:
+        "{{ lofreq viterbi -f {input.ref} {input.bam} |"
+        "lofreq alnqual -u - {input.ref} |"
+        "lofreq indelqual --dindel -f {input.ref} - |"
+        " samtools sort -o {output} -T {output}_sortTMP -;"
+        "}} &>> {log}"
