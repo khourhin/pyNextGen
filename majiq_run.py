@@ -1,4 +1,6 @@
 #### TO EDIT !!!!!!!!!!!
+#### INCOMPLETE NOW !!! MISSING DELTAPSI !! >>> NOW ADDED BUT NOT TESTED
+
 
 # table input example
 # | CR_Inp_1.bam     | CR_Inp     |
@@ -29,6 +31,7 @@ STR_SPE=''
 import os
 import argparse
 import subprocess
+import itertools
 
 def parse_input(input_tab):
     """Parse input for majiq. Input should have:
@@ -96,6 +99,16 @@ def main(inp, groups):
         print(cmd)
   #      subprocess.check_output(cmd, shell=True)
 
+    for i,j in itertools.combinations(groups, 2):
+        print(i,j)
+        dot_majiq_i = ' '.join([x + '.majiq' for x in inp if inp[x][1] == i])
+        dot_majiq_j = ' '.join([x + '.majiq' for x in inp if inp[x][1] == j])
+
+        cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=NTHREADS)
+        print(cmd)
+#        subprocess.check_output(cmd, shell=True)
+
+  
 
 if __name__ == '__main__':
     
