@@ -1,0 +1,37 @@
+# USAGE
+# snakemake -s ~/Programming/pyNextGen/snake_make_recipes/freebayes.sm --config bams='/home/ekornobis/data/borja/junco/bams/*.bam' ref_fas='/home/ekornobis/data/genomes/ensembl/t_guttata/Taeniopygia_guttata.taeGut3.2.4.dna.toplevel.fa'
+
+# ASSUMPTIONS
+# Should have read groups
+
+import glob
+import os
+
+# The bam folder
+BAMS = config['bams']
+# The Reference Fasta
+REF = config['ref_fas']
+
+SAMPLE = [ os.path.basename(x).replace('.bam', '')
+           for x in glob.glob(BAMS)]
+
+
+# rule targets:
+#    input:
+#        expand('')
+
+
+rule freebayes:
+    input:
+        bams = expand(os.path.dirname(BAMS) + '/{sample}.bam', sample = SAMPLE),
+        ref_fas = REF
+
+    output:
+        'test.vcf'
+
+    log:
+        err = 'freebayes_test.err',
+        out = 'freebayes_test.out'
+
+    shell:
+        'freebayes -f {input.ref_fas} {input.bams} > {output}'
