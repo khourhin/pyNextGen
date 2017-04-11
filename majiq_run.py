@@ -1,7 +1,3 @@
-#### TO EDIT !!!!!!!!!!!
-#### INCOMPLETE NOW !!! MISSING DELTAPSI !! >>> NOW ADDED BUT NOT TESTED
-
-
 # table input example
 # | CR_Inp_1.bam     | CR_Inp     |
 # | CR_Inp_2.bam     | CR_Inp     |
