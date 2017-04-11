@@ -70,20 +70,23 @@ genome_path={3}
                                                       for x in inp
                                                       if inp[x][1] == grp])))
 
-def main(inp, groups):
-            
-#    os.makedirs(OUTDIR)
-    os.chdir(OUTDIR)
+def main(inp, groups, debug=False):
+
+    if not debug:
+        os.makedirs(OUTDIR)
+        os.chdir(OUTDIR)
 
     print(inp)
     print(groups)
-    
-    create_conf(CONF_FILE, inp)
+
+    if not debug:
+        create_conf(CONF_FILE, inp)
     
     cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(GFF, CONF_FILE, NTHREADS)
     print(cmd)
 
-#    subprocess.check_output(cmd, shell=True)
+    if not debug:
+        subprocess.check_output(cmd, shell=True)
 
     for grp in groups:
 
@@ -93,11 +96,15 @@ def main(inp, groups):
         
         cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, NTHREADS, grp)
         print(cmd)
- #       subprocess.check_output(cmd, shell=True)
+        
+        if not debug:
+            subprocess.check_output(cmd, shell=True)
 
         cmd = 'voila psi psi_{0}/{0}_psigroup.pickle -splice-graphs1 {1} -o voila_{0}'.format(grp, dot_splicegraph)
         print(cmd)
-  #      subprocess.check_output(cmd, shell=True)
+
+        if not debug:
+            subprocess.check_output(cmd, shell=True)
 
     for i,j in itertools.combinations(groups, 2):
         print(i,j)
@@ -106,16 +113,27 @@ def main(inp, groups):
 
         cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=NTHREADS)
         print(cmd)
-#        subprocess.check_output(cmd, shell=True)
 
-  
+        if not debug:
+            subprocess.check_output(cmd, shell=True)
+
+        dot_splicegraph_i = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == i])
+        dot_splicegraph_j = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == j])
+            
+        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi_quantify.pickle -splice-graphs1 {splice_i} -splice-graphs2 {splice_j} -o voila_{i}_{j}'.format(i=i, j=j, splice_i=dot_splicegraph_i, splice_j=dot_splicegraph_j)
+
+        print(cmd)
+        if not debug:
+            subprocess.check_output(cmd, shell=True)
+
 
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument('input', help='')
+    parser.add_argument('--debug', '-d', help='', action='store_true')
     args = parser.parse_args()
 
     inp, groups = (parse_input(args.input))
     
-    main(inp, groups)
+    main(inp, groups, args.debug)
