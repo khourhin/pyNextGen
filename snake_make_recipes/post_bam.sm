@@ -1,5 +1,8 @@
 # USAGE
-# snakemake --cores 4 -s ~/Programming/pyNextGen/snake_make_recipes/post_bam.sm --config sams='bams/SRR22217*' gtf=~/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf
+# snakemake --cores 4 -s ~/Programming/pyNextGen/snake_make_recipes/post_bam.sm --config sams='bams/SRR22217*' gtf=~/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf bed=/home/ekornobis/data/genomes/ensembl/h_sapiens/hg37/hg19_refseq_sort.bed
+
+# OR
+#snakemake --cores 4 -s post_bam.sm --configfile config_seqherv.json
 
 # ASSUMPTIONS
 # QORTS:
@@ -19,70 +22,86 @@
 # Qorts can ask for a lot of memory if paired with broken pairs (keeps the
 # singletons in memory)
 
-
-################################################################################
-#	STUBBY STUB !!!!!                                                      #
-################################################################################
-
 import glob
 import os
 
 SAMFILES = config['sams']
 GTF = config['gtf']
+BED = config['bed']
 
 SAMPLE = [ os.path.basename(x).replace('.bam', '')
            for x in glob.glob(SAMFILES)]
 
 rule targets:
     input:
-        expand('qorts/{sample}', sample=SAMPLE)
+        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
+#        expand('qorts/{sample}', sample=SAMPLE)
 #        expand('qualimap/{sample}', sample=SAMPLE)
 
 rule qorts:
     input:
         bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
         gtf = GTF
-        
     output:
         'qorts/{sample}'
-
     log:
         err = 'logs/qorts_log.err',
         out = 'logs/qorts_log.out'
-        
     shell:
 #        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
         'qorts -Xmx16g -Xms8g QC --stranded --singleEnded --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
 
-# rule qualimap:
-#     input:
-#         bam = 'bams/{sample}.bam',
-#         gtf = GTF
+rule rseqc_read_distribution:
+    input:
+        bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
+        bed = BED
+    output:
+        'logs/rseqc_rd_{sample}_log.out'
 
-#     output:
-#         'qualimap/{sample}'
-        
-#     log:
-#         err = 'logs/qualimap_log.err',
-#         out = 'logs/qualimap_log.out'
+    log:
+        err = 'logs/rseqc_rd_log.err',
 
-#     shell:
-#         'qualimap rnaseq --java-mem-size=30G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
+    shell:
+        'read_distribution.py -i {input.bam} -r {input.bed} 1>> {output} 2>> {log.err}'
         
-# rule featureCount:
-#     input:
-#         bam = '/home/ekornobis/Programming/pyNextGen/demo_data/{sample}.bam',
-#         gtf = GTF
-
-#     output:
-#         'featureCount/{sample}'
+rule qualimap:
+    input:
+        bam = 'bams/{sample}.bam',
+        gtf = GTF
+    output:
+        'qualimap/{sample}'
+    log:
+        err = 'logs/qualimap_log.err',
+        out = 'logs/qualimap_log.out'
+    shell:
+        'qualimap rnaseq --java-mem-size=30G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
         
-#     log:
-#         err = 'logs/featureCount_log.err',
-#         out = 'logs/featureCount_log.out'
-
-#     threads: 10
-        
-#     shell:
-#         'featureCount -s 0 -T {threads} -t exon -g gene_id -a {input.gtf} -o {output}  1>> {log.out} 2>> {log.err}'
+rule featureCount:
+    input:
+        bam = '/home/ekornobis/Programming/pyNextGen/demo_data/{sample}.bam',
+        gtf = GTF
+    output:
+        'featureCount/{sample}'
+    log:
+        err = 'logs/featureCount_log.err',
+        out = 'logs/featureCount_log.out'
+    threads: 10
+    shell:
+        'featureCount -s 0 -T {threads} -t exon -g gene_id -a {input.gtf} -o {output}  1>> {log.out} 2>> {log.err}'
     
+rule sort:
+    input:
+        os.path.dirname(SAMFILES) + '/{sample}.bam'
+
+    output:
+        '{sample}_sorted.bam'
+
+    params:
+        'coordinate'
+
+    log:
+        err = 'picard_test.err',
+        out = 'picard_test.out'
+
+    shell:
+        'picard SortSam I={input} O={output} SO={params} 1>>{log.out} 2>>{log.err}'
