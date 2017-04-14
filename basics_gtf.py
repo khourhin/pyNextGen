@@ -6,8 +6,6 @@ import os
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-# STUB
-
 
 def create_db(gtf, dbfn):
     """
