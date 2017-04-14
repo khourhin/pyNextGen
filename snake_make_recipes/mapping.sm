@@ -1,0 +1,33 @@
+import glob
+import os.path
+
+
+READS = 'reads/mini/*.fq.gz'
+SAMPLE = [ os.path.basename(x).replace('.fq.gz', '')
+           for x in glob.glob(READS)]
+
+rule targets:
+    input:
+        expand("star/{sample}_pass1_Aligned.sortedByCoord.out.bam", sample=SAMPLE)
+
+rule star_single:
+    input:
+        reads = ["reads/mini/{sample}.fq.gz"],
+        idx = config['idx'],
+        gtf = config['gtf'],
+        
+    output:
+        # see STAR manual for additional output files
+        "star/{sample}_pass1_Aligned.sortedByCoord.out.bam"
+    log:
+        "logs/star/{sample}.log"
+    params:
+        # path to STAR reference genome index
+        index="index",
+        # optional parameters
+        extra=""
+    threads: 5           
+
+    shell:
+        "STAR --genomeDir {input.idx} --readFilesIn {input.reads} --sjdbGTFfile {input.gtf} --outFileNamePrefix star/{wildcards.sample}_pass1_ --outSAMtype BAM SortedByCoordinate --runThreadN {threads} --readFilesCommand zcat"
+
