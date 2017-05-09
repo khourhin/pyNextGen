@@ -6,21 +6,6 @@
 # | CR_Inp_nas_2.bam | CR_Inp_nas |
 # | CR_Inp_nas_3.bam | CR_Inp_nas |
 
-READ_LEN = 50 # Set to maximum read length in your dataset
-SAM_DIR = '/home/ekornobis/analysis/batsche/badeg/star_out_blattler/bams'
-GENOME_NAME = 'hg19'
-GENOME_PATH = '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.dna_sm.toplevel.fa'
-GFF = '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg37/majiq/ensembl_ENST_hg19.gff3'
-
-NTHREADS=30
-# NO SLASH AT THE END !
-OUTDIR='majiq_blattler_1.0'
-CONF_FILE='majiq.conf'
-
-#STR_SPE='type=strand-specific'
-# or
-STR_SPE=''
-
 # TO ADD
 # MAKE BAM INDEX FIRST (ALWAYS FORGETTING ABOUT THOSE
 
@@ -126,10 +111,31 @@ def main(inp, groups, debug=False):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('input', help='')
+    parser.add_argument('--meta','-m', required=True, help='A table with meta information on the bams ie $1: File names; $2: groups')
+    parser.add_argument('--bam_dir','-b', required=True, help='The absolute path to the bam directory')
+    parser.add_argument('--gfas','-g', required=True, help='The path to the genome fasta file')
+    parser.add_argument('--gff', '-a', required=True, help='Annotation GFF file')
+    parser.add_argument('--read_len', '-l', required=True, help='Length of the reads (set to maximum read length in your dataset)')
+    parser.add_argument('--stranded', '-s', action='store_true', help='Specify if reads are stranded')
     parser.add_argument('--debug', '-d', help='', action='store_true')
     args = parser.parse_args()
 
-    inp, groups = (parse_input(args.input))
-    
+    inp, groups = (parse_input(args.meta))
+
+    READ_LEN = args.read_len
+    SAM_DIR = args.bam_dir
+    GENOME_NAME = 'hg19'
+    GENOME_PATH = args.gfas
+    GFF = args.gff
+
+    NTHREADS=30
+    # NO SLASH AT THE END !
+    OUTDIR='majiq_out'
+    CONF_FILE='majiq.conf'
+
+    if args.stranded:
+        STR_SPE='type=strand-specific'
+    else:
+        STR_SPE=''
+
     main(inp, groups, args.debug)
