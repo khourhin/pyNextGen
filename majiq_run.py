@@ -44,26 +44,27 @@ samdir={1}
 genome={2}
 genome_path={3}
 {4}
-[experiments]\n""".format(READ_LEN, SAM_DIR, GENOME_NAME, GENOME_PATH, STR_SPE))
+[experiments]\n""".format(args.read_len, args.bam_dir, os.path.basename(args.gfas), args.gfas, args.stranded))
 
         for grp in groups:
             f.write('{0}={1}\n'.format(grp, ','.join([x
                                                       for x in inp
                                                       if inp[x][1] == grp])))
 
-def main(inp, groups, debug=False):
+def main(args, inp, groups, debug=False):
 
     if not debug:
-        os.makedirs(OUTDIR)
-        os.chdir(OUTDIR)
+        os.makedirs(args.outdir)
+        os.chdir(args.outdir)
 
     print(inp)
     print(groups)
-
-    if not debug:
-        create_conf(CONF_FILE, inp)
+    print(args.stranded)
     
-    cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(GFF, CONF_FILE, NTHREADS)
+    if not debug:
+        create_conf(args.majiq_conf, inp)
+    
+    cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(args.gff, args.majiq_conf, args.threads)
     print(cmd)
 
     if not debug:
@@ -75,7 +76,7 @@ def main(inp, groups, debug=False):
         dot_majiq = ' '.join([x + '.majiq' for x in inp if inp[x][1] == grp])
         dot_splicegraph = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == grp])
         
-        cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, NTHREADS, grp)
+        cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, args.threads, grp)
         print(cmd)
         
         if not debug:
@@ -92,7 +93,7 @@ def main(inp, groups, debug=False):
         dot_majiq_i = ' '.join([x + '.majiq' for x in inp if inp[x][1] == i])
         dot_majiq_j = ' '.join([x + '.majiq' for x in inp if inp[x][1] == j])
 
-        cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=NTHREADS)
+        cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=args.threads)
         print(cmd)
 
         if not debug:
@@ -116,26 +117,13 @@ if __name__ == '__main__':
     parser.add_argument('--gfas','-g', required=True, help='The path to the genome fasta file')
     parser.add_argument('--gff', '-a', required=True, help='Annotation GFF file')
     parser.add_argument('--read_len', '-l', required=True, help='Length of the reads (set to maximum read length in your dataset)')
-    parser.add_argument('--stranded', '-s', action='store_true', help='Specify if reads are stranded')
+    parser.add_argument('--stranded', '-s', action='store_const', const='type=strand-specific', default='',
+                        help='Specify if reads are stranded. Default is unstranded.')
+    parser.add_argument('--threads', '-t', help='Number of threads to use', default=5, type=int)    
+    parser.add_argument('--outdir', '-o', help='Path to output directory (NO SLASH AT THE END FOR NOW!)', default='majiq_out', type=str)    
+    parser.add_argument('--majiq_conf', '-c', help='Path to the create majiq.conf file (not important at all...)', default='majiq.conf', type=str)    
     parser.add_argument('--debug', '-d', help='', action='store_true')
     args = parser.parse_args()
 
     inp, groups = (parse_input(args.meta))
-
-    READ_LEN = args.read_len
-    SAM_DIR = args.bam_dir
-    GENOME_NAME = 'hg19'
-    GENOME_PATH = args.gfas
-    GFF = args.gff
-
-    NTHREADS=30
-    # NO SLASH AT THE END !
-    OUTDIR='majiq_out'
-    CONF_FILE='majiq.conf'
-
-    if args.stranded:
-        STR_SPE='type=strand-specific'
-    else:
-        STR_SPE=''
-
-    main(inp, groups, args.debug)
+    main(args, inp, groups, args.debug)
