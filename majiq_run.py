@@ -23,6 +23,9 @@ def parse_input(input_tab):
     groups = set()
     with open(input_tab, 'r') as f:
         for line in f:
+            if line.startswith('#'):
+                continue
+        
             file_path = line.split()[0]
             group = line.split()[1]
             name = os.path.splitext(os.path.basename(file_path))[0]
