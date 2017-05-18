@@ -1,5 +1,9 @@
 import argparse
 import subprocess
+import logging
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 # USAGE EX:
 #cd /home/ekornobis/analysis/batsche/methyleu/2.0_pileuping
@@ -37,14 +41,14 @@ class Gene():
 def get_bam_for_gene(sra, gene, flank):
     """
     """
-    print(gene)
+    log.info(gene)
     bam = "{sra}_{gene_name}.bam".format(sra=sra, gene_name=gene.gene_name)
     cmd = 'sam-dump --aligned-region {chr}:{start}-{end} {sra} | samtools view -bh > {bam}'.format(chr=gene.chrom,
                                                                                                    start=gene.start - flank,
                                                                                                    end=gene.end + flank,
                                                                                                    bam=bam,
                                                                                                    sra=sra)
-    print(cmd)
+    log.info(cmd)
     subprocess.check_output(cmd, shell=True)
     
 def get_all_bams(sra, gene_tab, flank):
@@ -59,7 +63,7 @@ def get_all_bams(sra, gene_tab, flank):
 def main():    
     parser = argparse.ArgumentParser()
     parser.add_argument('sra', help='The SRR identifier to get the data from.')
-    parser.add_argument('gene_tab', help='A table file with $1: ENSEMBL ID, $2: gene name, $3: chromosome, $4: start, $5: end')
+    parser.add_argument('gene_tab', help='A gtf file extract with only gene rows for the selected genes')
     parser.add_argument('--flank', '-f', help='Number of bases to add on each flank of the gene interval', default=0, type=int)
 
     args = parser.parse_args()
