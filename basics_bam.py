@@ -1,4 +1,12 @@
+import argparse
+import logging as log
 import pysam
+from collections import Counter
+import pandas as pd
+
+log.basicConfig(filename='example.log', level=log.INFO)
+log.getLogger().addHandler(log.StreamHandler())
+
 
 # IN DVPT
 
@@ -7,27 +15,44 @@ import pysam
 # read by names)
 
 
+def openBam(bam):
+    with pysam.AlignmentFile(bam, 'rb') as f:
+        for read in f:
+            yield read
+
+            
 def get_read_by_id(id_list, bam):
     """
     Get the alignement from a bam file given an read id_list
     """
 
-    read_sel = []
-    with pysam.AlignmentFile(bam, 'r') as bam_in:
-        for rd in bam_in.fetch(until_eof=True):
-            if rd.query_name in id_list:
-                read_sel.append(rd)
+    for read in openBam(bam):
+        if read.query_name in id_list:
+            yield read
 
-    return read_sel
-
-
-def print_bam(read_sel, bam_in, bam_out):
+            
+def count_bases(bam):
     """
-    From a list of pysam reads, write out a bam file. bam_in is used
-    only for its header.
+    Describe the proportion of A in primary alignments (we are
+    trying here to segregate between polyAs and genomes As so need to
+    remove the clipped part of the alignments before computing
+    nucleotide proportions in reads)
     """
+    for read in openBam(bam):
+        if not read.is_secondary:
+            count = Counter(read.query_alignment_sequence)
+            yield(count)
 
-    with pysam.AlignmentFile(bam_out, 'wb',
-                             template=pysam.AlignmentFile(bam_in)) as bam_out:
-        for rd in read_sel:
-            bam_out.write(rd)
+            
+def overall_bases_composition(bam):
+    counts = pd.DataFrame(count_bases(bam))
+    log.info('Total bases composition:\n{}'.format(counts.sum() / sum(counts.sum())))
+    return counts
+
+                        
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('bam', help='The path to a bam file')
+    args = parser.parse_args()
+    
+    overall_bases_composition(args.bam)
