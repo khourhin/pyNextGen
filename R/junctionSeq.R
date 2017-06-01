@@ -3,7 +3,8 @@
 
 # By default, use 20 threads
 
-# Check python good_practices pyensembl for creating CORR-FILE
+## Check python good_practices pyensembl for creating CORR-FILE
+## 
 
 options(bitmapType="cairo")
 library(JunctionSeq)
@@ -20,7 +21,9 @@ gff.file = args[3]
 corr.file = args[4]
 
 
-decoder = read.table(sampleData, col.names=c('ID', 'GROUP'), stringsAsFactors=FALSE)
+decoder = read.table(sampleData, col.names=c('ID', 'GROUP'), stringsAsFactors=FALSE, comment="#")
+
+print(decoder)
 
 ## Raw from sample group table
 countFiles = paste0(qortDir, decoder$ID, '/QC.spliceJunctionAndExonCounts.forJunctionSeq.txt.gz')
