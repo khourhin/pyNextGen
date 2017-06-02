@@ -2,6 +2,11 @@ import argparse
 import logging
 import gffutils
 import os
+from collections import Counter
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from multiprocessing import Pool
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -45,6 +50,7 @@ def get_introns(dbfn, out_gtf):
         for i in introns:
             f.write(str(i) + '\n')
 
+            
 def get_exons(dbfn, genes):
     """
     Print out all the exons for a list of genes
@@ -83,7 +89,28 @@ def get_exons(dbfn, genes):
         # Or complete report
         # print(dir(exon))
 
-            
+        
+def get_stats(dbfn):
+    """
+    Produce statistics to describe the gtf file corresponding to dbfn
+    """
+    
+    db = gffutils.FeatureDB(dbfn)
+    biotypes = Counter([feat.attributes['gene_biotype'][0] for feat in db.all_features()])
+
+    stats = {
+        "biotypes": biotypes
+    }
+
+    labels, values = zip(*biotypes.items())
+    index = np.arange(len(labels))
+    plt.bar(index, values)
+    plt.xticks(index, labels, rotation=90)
+    plt.show()
+    
+    [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+
+    
 def main():
     
     parser = argparse.ArgumentParser()
@@ -98,6 +125,10 @@ def main():
 
     group.add_argument('--exons', '-e',
                        help='Print out all the exons for the list of genes specified.', nargs='+')
+    
+    group.add_argument('--stats', '-s', action='store_true',
+                       help='Print out statistics on the gtf file specified')
+    
     args = parser.parse_args()
 
     # Create db if not in current folder
@@ -113,9 +144,12 @@ def main():
         get_introns(dbfn, 'introns.gtf')
     if args.exons:
         get_exons(dbfn, args.exons)
+    if args.stats:
+        get_stats(dbfn)    
 
 
 if __name__ == '__main__':
-    
+
+    p = Pool(10)
     main()
-    
+
