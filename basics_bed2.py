@@ -3,6 +3,8 @@ from pybedtools import BedTool
 import argparse
 import logging as log
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 log.basicConfig(filename='example.log', level=log.INFO)
 log.getLogger().addHandler(log.StreamHandler())
@@ -26,6 +28,8 @@ def bed_stats(bedObj, genome_size):
     """
 
     lengths = [len(i) for i in bedObj]
+    pd.DataFrame({"lengths":lengths}).plot()
+    plt.show()
      
     stats = {
         'length': len(bedObj),
@@ -35,6 +39,7 @@ def bed_stats(bedObj, genome_size):
         'genome_coverage': get_genome_coverage(bedObj, genome_size)
     }
 
+    
     [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
     
 if __name__ == "__main__":
