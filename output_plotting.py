@@ -3,8 +3,9 @@ import logging as log
 import pandas as pd
 import filehandling
 import matplotlib.pyplot as plt
+from matplotlib_venn import venn2, venn3
 
-log.basicConfig(filename='example.log', level=log.INFO)
+log.basicConfig(filename='example.log', level=log.DEBUG)
 log.getLogger().addHandler(log.StreamHandler())
 
 def plot_featureCount_output(prefix):
@@ -23,10 +24,29 @@ def plot_featureCount_output(prefix):
     df.plot()
     plt.show()
 
+def compare_sets(set_file):
+
+    set_list = []
+    with open(set_file) as f:
+        for line in f:
+            set_list.append(set(line.split()))
+        
+    log.debug('Set List:{}'.format(set_list))
+    
+    if len(set_list) == 2:
+        venn2(set_list)
+    if len(set_list) == 3:
+        venn3(set_list)
+    plt.show()
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--featureCount', help='Specify the prefix used for the FeatureCount output')
+    parser.add_argument('--setCompare', help='Specify a file with the sets to compare, one on each line')
     args = parser.parse_args()
 
-    plot_featureCount_output(args.featureCount)
+    if args.featureCount:
+        plot_featureCount_output(args.featureCount)
+
+    if args.setCompare:
+        compare_sets(args.setCompare)
