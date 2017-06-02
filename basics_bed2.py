@@ -1,24 +1,47 @@
 # Now using pybedtools
 from pybedtools import BedTool
-import logging
+import argparse
+import logging as log
+import numpy as np
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
-
-bam1 = '/home/ekornobis/analysis/demo/c_elegans/star_out/bams/SRR019721.bam'
-bam2 = '/home/ekornobis/analysis/demo/c_elegans/star_out/bams/SRR019722.bam'
+log.basicConfig(filename='example.log', level=log.INFO)
+log.getLogger().addHandler(log.StreamHandler())
 
 
-a = BedTool(bam1).bam_to_bed(bed12=True)
-a = a.merge(s=True)
+def get_genome_coverage(bedObj, genome_size):
+    """
+    Get an estimation of the proportion of the genome covered by all
+    the intervals present in the bed object.
+    """
 
-b= BedTool(bam2).bam_to_bed()
-b = b.merge(s=True)
+    bedObj = bedObj.sort().merge()
+    cov = sum([len(i) for i in bedObj]) / genome_size
 
-log.info('Bams import DONE')
+    return cov
 
-c = a.intersect(b, s=True)
 
-log.info('Intersection DONE')
+def bed_stats(bedObj, genome_size):
+    """
+    Produce various stats on a bed file
+    """
 
-log.info('DONE')
+    lengths = [len(i) for i in bedObj]
+     
+    stats = {
+        'length': len(bedObj),
+        'smallest': min(lengths),
+        'largest': max(lengths),
+        'mean': np.mean(lengths),
+        'genome_coverage': get_genome_coverage(bedObj, genome_size)
+    }
+
+    [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('bed', help='A bed file')
+    parser.add_argument('genome_size', type=int, help='The total number of bases of the considered genome')
+    args = parser.parse_args()
+
+    bedObj = BedTool(args.bed)
+    bed_stats(bedObj, args.genome_size)
