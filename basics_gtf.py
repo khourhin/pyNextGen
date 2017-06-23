@@ -59,7 +59,7 @@ def get_exons(dbfn, genes):
     # Header
     print("exon_name\tgene_name\tensID\texonID\tchrom\tstart\tstop\tlength\tstrand")
  
-    for gene in genes:
+    for i, gene in enumerate(genes, start=1):
         log.debug("Printing exon for gene: {}".format(gene))
         ex_start = None
         ex_stop = None
@@ -87,7 +87,7 @@ def get_exons(dbfn, genes):
             ))
         # Or complete report
         # print(dir(exon))
-
+    log.debug("Total number of gene checked: {}".format(i))
         
 def get_stats(dbfn):
     """
