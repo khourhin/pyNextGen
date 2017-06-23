@@ -17,38 +17,40 @@ def parse_ID_name_list(mixed_list):
     """
     log.info('Total number of genes in the list: {}'.format(len(mixed_list)))
 
-    bad_names_count = 0
-    multiple_IDs_per_name = 0
+    bad_names_count = []
+    multiple_IDs_per_name = []
     a = re.compile('ENSG\d{11}')
     
-    for i in mixed_list:
+    for gene_id in mixed_list:
         # the item is an ensembl gene id
-        
-        if a.match(i):
-            g_entry = data.gene_by_id(i)
 
-        # the item is a associated gene name
+        # Check if the name is an Ensembl gene ID (ENSG)
+        if a.match(gene_id):
+            g_entry = data.gene_by_id(gene_id)
+
+        # Else if the name is an associated gene name
         else:
             
             try:
-                # genes_by_name
-                g_entry = data.genes_by_name(i)
+                g_entry = data.genes_by_name(gene_id)
 
                 # Check if unique match associated gene name / ensembl ID
                 if len(g_entry) == 1:
                     g_entry = g_entry[0]
                 else:
-                    multiple_IDs_per_name += 1
+                    multiple_IDs_per_name.append(gene_id)
                     g_entry = None
                 
             except ValueError:
                 g_entry = None
-                bad_names_count += 1
+                bad_names_count.append(gene_id)
 
         yield g_entry
                 
-    log.warn('Number of genes failing entry lookup (probably alias gene problem): {} [DISCARDED]'.format(bad_names_count))
-    log.warn('Number of gene names associated with more than 1 ensembl ID: {} [DISCARDED]'.format(multiple_IDs_per_name))
+    log.warn('Number of genes failing entry lookup (probably alias gene problem): {0} {1} [DISCARDED]'.format(len(bad_names_count),
+                                                                                                              bad_names_count))
+    log.warn('Number of gene names associated with more than 1 ensembl ID: {0} {1} [DISCARDED]'.format(len(multiple_IDs_per_name),
+                                                                                                       multiple_IDs_per_name))
 
     
 def print_gene_list(ginfos):
