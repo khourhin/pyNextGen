@@ -6,7 +6,6 @@ from collections import Counter
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from multiprocessing import Pool
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -150,6 +149,5 @@ def main():
 
 if __name__ == '__main__':
 
-    p = Pool(10)
     main()
 
