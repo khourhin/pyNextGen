@@ -60,7 +60,7 @@ def print_gene_list(ginfos):
     
     for i in ginfos:
         if i:
-            print(i.contig, i.start, i.end, i.strand, i.gene_id, i.name)
+            print(i.contig, i.start, i.end, i.strand, i.gene_id, i.name, sep='\t')
 
             
 def main():
