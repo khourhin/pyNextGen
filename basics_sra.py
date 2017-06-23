@@ -1,8 +1,9 @@
 import argparse
 import subprocess
 import logging
+from multiprocessing import Pool
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 # USAGE EX:
@@ -39,11 +40,23 @@ class Gene():
         return string
 
 def get_bam_for_gene(sra, gene, flank):
-    """
+    """*TO IMPROVE* so far this function is taking as input a extracted
+    gtf This should use an import instead of
+    basics_ensembl.print_gene_list (which gives start and end of each
+    genes), but I'm concerned about the import of the global variable
+    'data' (pretty bad name by the way) which is in
+    basics_ensembl. Refactoring is NEEDED.
+
     """
     log.info(gene)
+    
+    # sratool-kit use ncbi "chr" notation for chromosome names
+    # So add it if not present
+    if not gene.chrom.startswith('chr'):
+        chro = 'chr' + gene.chrom
+        
     bam = "{sra}_{gene_name}.bam".format(sra=sra, gene_name=gene.gene_name)
-    cmd = 'sam-dump --aligned-region {chr}:{start}-{end} {sra} | samtools view -bh > {bam}'.format(chr=gene.chrom,
+    cmd = 'sam-dump --aligned-region {chr}:{start}-{end} {sra} | samtools view -bh > {bam}'.format(chr=chro,
                                                                                                    start=gene.start - flank,
                                                                                                    end=gene.end + flank,
                                                                                                    bam=bam,
@@ -51,24 +64,24 @@ def get_bam_for_gene(sra, gene, flank):
     log.info(cmd)
     subprocess.check_output(cmd, shell=True)
     
-def get_all_bams(sra, gene_tab, flank):
+def get_all_bams(sra, gene_ids, flank):
     """
     """
-    
-    with open(gene_tab, 'r') as f:
+    with open(gene_ids, 'r') as f:
         for line in f:
             g = Gene(line)
+            log.debug('Fetching SRA: {0}, for gene: {1} with flanking of {2}'.format(sra, g.gene_name, flank))            
             get_bam_for_gene(sra, g, flank)
         
 def main():    
     parser = argparse.ArgumentParser()
     parser.add_argument('sra', help='The SRR identifier to get the data from.')
-    parser.add_argument('gene_tab', help='A gtf file extract with only gene rows for the selected genes')
+    parser.add_argument('gene_ids', help='A gtf file extract with only gene rows for the selected genes')
     parser.add_argument('--flank', '-f', help='Number of bases to add on each flank of the gene interval', default=0, type=int)
 
     args = parser.parse_args()
 
-    get_all_bams(args.sra, args.gene_tab, args.flank)
+    get_all_bams(args.sra, args.gene_ids, args.flank)
 
 if __name__ == "__main__":
     main()

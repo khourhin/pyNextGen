@@ -72,10 +72,12 @@ def main():
                         Ensembl IDs or associated gene names')
     args = parser.parse_args()
 
+    log.warning('This script is using h.sapiens release 75')
+    
     gene_entries = parse_id_name_list(
         [x.strip() for x in open(args.gene_names)])
     print_gene_list(gene_entries)
-
+    
 
 if __name__ == '__main__':
     main()
