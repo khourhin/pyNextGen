@@ -6,7 +6,7 @@ from pyensembl import EnsemblRelease
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-
+### THIS IS ONLY FOR HUMAN release 75 !!!
 data = EnsemblRelease(release=75, species="homo_sapiens")
 
 
