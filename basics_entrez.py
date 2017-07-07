@@ -8,6 +8,18 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
+################################################################################
+# NOT NECESSARY ANYMORE, FOR LEGACY
+
+# This program was meant to download automatically sras from a gse
+# id. This can be done using entrez direct from the command line:
+
+# e.g:
+# for i in $(esearch -db gds -query GSE85946 | elink -target sra | efetch --format runinfo | cut -d ',' -f 1 | grep SRR); do fastq-dump $i --split-files --gzip & done
+
+################################################################################
+
+
 def get_geo_id(gse):
     """Retrieve UID id from the Gene Expression Omnibus
     corresponding to the dataset id 'gse'
@@ -32,31 +44,10 @@ def get_geo_id(gse):
         return webenv, query_key
 
 
-def get_sras_ids(webenv, query_key):
+def link_to_sras_ids(webenv, query_key):
     """From a previous entrez query using get_geo_id, extract from gds
     identifiers the corresponding sras identifier and return them
     """
-    
-    params = urllib.parse.urlencode({'dbfrom': 'gds',
-                                     'db': 'sra',
-                                     'WebEnv': webenv,
-                                     'query_key': query_key,
-                                     'cmd': 'neighbor_history',
-                                     'retmode': 'json',
-                                     'email': 'ekornobis@gmail.com',
-                                     'tool': 'pythonScript'})
-    url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?{}'.format(params)
-
-    log.info('URL Query: {}'.format(url))
-    
-    with urllib.request.urlopen(url) as response:
-        
-        res = json.loads(response.read().decode('utf-8'))
-        log.debug(json.dumps(res, indent=4, sort_keys=True))
-        webenv = res['linksets'][0]['webenv']
-        query_key = res['linksets'][0]['linksetdbhistories'][0]['querykey']
-
-        
     params = urllib.parse.urlencode({'db': 'sra',
                                      'WebEnv': webenv,
                                      'query_key': query_key,
@@ -86,8 +77,7 @@ def get_sras_ids(webenv, query_key):
     # with urllib.request.urlopen(url) as response:
         
     #     res = response.read()
-    #     print(res)
-
+    #     print(res
     # urllib.request.urlretrieve(url, filename='test.csv')
         
         
@@ -113,3 +103,4 @@ if __name__ == '__main__':
 
     web_env, query_key = get_geo_id('GSE66763')
     get_sras_ids(web_env, query_key)
+    
