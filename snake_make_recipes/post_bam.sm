@@ -25,48 +25,42 @@
 import glob
 import os
 
-SAMFILES = config['sams']
 GTF = config['gtf']
-BED = config['bed']
 
-SAMPLE = [ os.path.basename(x).replace('.bam', '')
-           for x in glob.glob(SAMFILES)]
+SAMPLE = [os.path.splitext(os.path.basename(x))[0]
+          for x in glob.glob(os.path.join(config['samdir'], '*bam'))]
+
+print(SAMPLE)
+
 
 rule targets:
     input:
-        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
-#        expand('qorts/{sample}', sample=SAMPLE)
-#        expand('qualimap/{sample}', sample=SAMPLE)
+        expand('qorts/{sample}', sample=SAMPLE),
+        expand('qualimap/{sample}', sample=SAMPLE),
+        expand('featureCount/{sample}', sample=SAMPLE)
+        #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
 
+        
 rule qorts:
     input:
-        bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
+        bam = os.path.join(config['samdir'], '{sample}.bam'),
         gtf = GTF
     output:
         'qorts/{sample}'
     log:
         err = 'logs/qorts_log.err',
         out = 'logs/qorts_log.out'
+        
+    params:
+        defaults = config['qorts']
+        
     shell:
-#        'qorts -Xmx16g -Xms8g QC {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
-        'qorts -Xmx16g -Xms8g QC --stranded --singleEnded --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+        'qorts -Xmx16g -Xms8g QC {params.defaults} --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
 
-rule rseqc_read_distribution:
-    input:
-        bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
-        bed = BED
-    output:
-        'logs/rseqc_rd_{sample}_log.out'
-
-    log:
-        err = 'logs/rseqc_rd_log.err',
-
-    shell:
-        'read_distribution.py -i {input.bam} -r {input.bed} 1>> {output} 2>> {log.err}'
         
 rule qualimap:
     input:
-        bam = 'bams/{sample}.bam',
+        bam = os.path.join(config['samdir'], '{sample}.bam'),
         gtf = GTF
     output:
         'qualimap/{sample}'
@@ -74,34 +68,52 @@ rule qualimap:
         err = 'logs/qualimap_log.err',
         out = 'logs/qualimap_log.out'
     shell:
-        'qualimap rnaseq --java-mem-size=30G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
-        
+        'qualimap rnaseq --java-mem-size=16G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
+
+
 rule featureCount:
     input:
-        bam = '/home/ekornobis/Programming/pyNextGen/demo_data/{sample}.bam',
+        bam = os.path.join(config['samdir'], '{sample}.bam'),
         gtf = GTF
     output:
         'featureCount/{sample}'
     log:
         err = 'logs/featureCount_log.err',
         out = 'logs/featureCount_log.out'
-    threads: 10
-    shell:
-        'featureCount -s 0 -T {threads} -t exon -g gene_id -a {input.gtf} -o {output}  1>> {log.out} 2>> {log.err}'
-    
-rule sort:
-    input:
-        os.path.dirname(SAMFILES) + '/{sample}.bam'
-
-    output:
-        '{sample}_sorted.bam'
-
+    threads: 1
     params:
-        'coordinate'
-
-    log:
-        err = 'picard_test.err',
-        out = 'picard_test.out'
-
+        defaults = config['featureCount']
     shell:
-        'picard SortSam I={input} O={output} SO={params} 1>>{log.out} 2>>{log.err}'
+        'featureCounts -T {threads} {params.defaults} -a {input.gtf} -o {output} 1>> {log.out} 2>> {log.err}'
+        
+# rule rseqc_read_distribution:
+#     input:
+#         bam = os.path.dirname(SAMFILES) + '/{sample}.bam',
+#         bed = BED
+#     output:
+#         'logs/rseqc_rd_{sample}_log.out'
+
+#     log:
+#         err = 'logs/rseqc_rd_log.err',
+
+#     shell:
+#         'read_distribution.py -i {input.bam} -r {input.bed} 1>> {output} 2>> {log.err}'
+        
+        
+    
+# rule sort:
+#     input:
+#         os.path.dirname(SAMFILES) + '/{sample}.bam'
+
+#     output:
+#         '{sample}_sorted.bam'
+
+#     params:
+#         'coordinate'
+
+#     log:
+#         err = 'picard_test.err',
+#         out = 'picard_test.out'
+
+#     shell:
+#         'picard SortSam I={input} O={output} SO={params} 1>>{log.out} 2>>{log.err}'
