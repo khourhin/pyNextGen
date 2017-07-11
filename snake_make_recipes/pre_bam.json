@@ -1,0 +1,5 @@
+# This is a test
+{
+    'gtf': '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf',
+    'fqdir': '/home/ekornobis/Programming/pyNextGen/demo_data/fqs'
+}

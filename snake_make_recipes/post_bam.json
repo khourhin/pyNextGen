@@ -1,0 +1,9 @@
+# PATH SHOULD BE ABSOLUTE (NO '#')
+
+{
+    'samdir': '/home/ekornobis/tmp_storage/star_badeg/star_out_almamun/bams',
+    'gtf': '/home/ekornobis/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf',
+    'qorts': '--stranded --singleEnded',
+    'featureCount': '-s 1 -t exon -g gene_id',
+    'qualimap': '-p strand-specific-forward',
+}

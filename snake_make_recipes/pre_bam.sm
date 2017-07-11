@@ -1,0 +1,26 @@
+# EXAMPLE USAGE
+# 
+
+import glob
+import os
+
+GTF = config['gtf']
+
+SAMPLE = [os.path.splitext(os.path.basename(x))[0]
+          for x in glob.glob(os.path.join(config['fqdir'], '*fq'))]
+
+print(SAMPLE)
+
+rule targets:
+    input:
+        expand('qc/{sample}.html', sample=SAMPLE),
+                
+rule fastqc:
+    input:
+        os.path.join(config['fqdir'], '{sample}.fq'),
+    output:
+        html="qc/{sample}.html",
+        zip="qc/{sample}.zip"
+    params: ""
+    wrapper:
+        "0.17.2/bio/fastqc"
