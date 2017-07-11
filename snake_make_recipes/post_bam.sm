@@ -69,8 +69,10 @@ rule qualimap:
     log:
         err = 'logs/qualimap_{sample}_log.err',
         out = 'logs/qualimap_{sample}_log.out'
+    params:
+        defaults = config['qualimap']
     shell:
-        'qualimap rnaseq --java-mem-size=16G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
+        'qualimap rnaseq --java-mem-size=16G {params.defaults} -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
 
 
 rule featureCount:
@@ -82,7 +84,7 @@ rule featureCount:
     log:
         err = 'logs/featureCount_log.err',
         out = 'logs/featureCount_log.out'
-    threads: 1
+    threads: 10
     params:
         defaults = config['featureCount']
     shell:
@@ -90,6 +92,11 @@ rule featureCount:
 
 
 rule multiqc:
+    input:
+        'featureCount/counts',
+        expand('qorts/{sample}', sample=SAMPLE),
+        expand('qualimap/{sample}', sample=SAMPLE),
+
     output:
         'multiqc_report.html'
     shell:
