@@ -35,9 +35,10 @@ print(SAMPLE)
 
 rule targets:
     input:
-        expand('qorts/{sample}', sample=SAMPLE),
-        expand('qualimap/{sample}', sample=SAMPLE),
-        expand('featureCount/{sample}', sample=SAMPLE)
+        'featureCount/counts',
+#        expand('qorts/{sample}', sample=SAMPLE),
+#        expand('qualimap/{sample}', sample=SAMPLE),
+
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
 
         
@@ -73,10 +74,10 @@ rule qualimap:
 
 rule featureCount:
     input:
-        bam = os.path.join(config['samdir'], '{sample}.bam'),
+        bams = expand(os.path.join(config['samdir'], '{sample}.bam'), sample=SAMPLE),
         gtf = GTF
     output:
-        'featureCount/{sample}'
+        'featureCount/counts'
     log:
         err = 'logs/featureCount_log.err',
         out = 'logs/featureCount_log.out'
@@ -84,7 +85,7 @@ rule featureCount:
     params:
         defaults = config['featureCount']
     shell:
-        'featureCounts -T {threads} {params.defaults} -a {input.gtf} -o {output} 1>> {log.out} 2>> {log.err}'
+        'featureCounts -T {threads} {params.defaults} -a {input.gtf} -o {output} {input.bams} 1>> {log.out} 2>> {log.err}'
         
 # rule rseqc_read_distribution:
 #     input:
