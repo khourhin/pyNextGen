@@ -36,8 +36,9 @@ print(SAMPLE)
 rule targets:
     input:
         'featureCount/counts',
-#        expand('qorts/{sample}', sample=SAMPLE),
-#        expand('qualimap/{sample}', sample=SAMPLE),
+        expand('qorts/{sample}', sample=SAMPLE),
+        expand('qualimap/{sample}', sample=SAMPLE),
+        'multiqc_report.html'
 
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
 
@@ -49,8 +50,8 @@ rule qorts:
     output:
         'qorts/{sample}'
     log:
-        err = 'logs/qorts_log.err',
-        out = 'logs/qorts_log.out'
+        err = 'logs/qorts_{sample}_log.err',
+        out = 'logs/qorts_{sample}_log.out'
         
     params:
         defaults = config['qorts']
@@ -66,8 +67,8 @@ rule qualimap:
     output:
         'qualimap/{sample}'
     log:
-        err = 'logs/qualimap_log.err',
-        out = 'logs/qualimap_log.out'
+        err = 'logs/qualimap_{sample}_log.err',
+        out = 'logs/qualimap_{sample}_log.out'
     shell:
         'qualimap rnaseq --java-mem-size=16G -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
 
@@ -86,6 +87,13 @@ rule featureCount:
         defaults = config['featureCount']
     shell:
         'featureCounts -T {threads} {params.defaults} -a {input.gtf} -o {output} {input.bams} 1>> {log.out} 2>> {log.err}'
+
+
+rule multiqc:
+    output:
+        'multiqc_report.html'
+    shell:
+        'multiqc .'
         
 # rule rseqc_read_distribution:
 #     input:
