@@ -9,15 +9,9 @@
 # reads UNSTRANDED AND PAIRED
 # Otherwise
 # --singleEnded
-# --stranded
-# --stranded_fr_secondstrand # For reversed stranded ?
+# --stranded (reverse stranded in HTSEQ nomenclature)
+# --stranded_fr_secondstrand (stranded in HTSEQ nomenclature)
 
-# QUALIMAP
-# reads ARE UNPAIRED
-# Java mem size = 30gb
-
-# FEATURECOUNT
-# reads ARE UNSTRANDED UNPAIRED, 10 THREADS
 
 # Qorts can ask for a lot of memory if paired with broken pairs (keeps the
 # singletons in memory)
@@ -38,9 +32,21 @@ rule targets:
         'featureCount/counts',
         expand('qorts/{sample}', sample=SAMPLE),
         expand('qualimap/{sample}', sample=SAMPLE),
-        'multiqc_report.html'
+        'multiqc_report.html',
+        expand('fastqc/{sample}_fastqc.html', sample=SAMPLE),
 
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
+
+        
+rule fastqc:
+    input:
+        os.path.join(config['fqdir'], '{sample}.fq.gz'),
+    output:
+        html="fastqc/{sample}_fastqc.html",
+        zip="fastqc/{sample}_fastqc.zip"
+    params: ""
+    wrapper:
+        "0.17.2/bio/fastqc"
 
         
 rule qorts:
