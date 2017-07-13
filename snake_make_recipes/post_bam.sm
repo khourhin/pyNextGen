@@ -16,13 +16,16 @@
 # Qorts can ask for a lot of memory if paired with broken pairs (keeps the
 # singletons in memory)
 
+# threads: they are used in the rules (even if not called in the shell
+# command, to "reserve" a number of threads [ie reserving RAM]
+
 import glob
 import os
 
 GTF = config['gtf']
 
 SAMPLE = [os.path.splitext(os.path.basename(x))[0]
-          for x in glob.glob(os.path.join(config['samdir'], '*bam'))]
+          for x in glob.glob(os.path.join(config['bamdir'], '*bam'))]
 
 print(SAMPLE)
 
@@ -33,32 +36,32 @@ rule targets:
         expand('qorts/{sample}', sample=SAMPLE),
         expand('qualimap/{sample}', sample=SAMPLE),
         'multiqc_report.html',
-        expand('fastqc/{sample}_fastqc.html', sample=SAMPLE),
+#        expand('fastqc/{sample}_fastqc.html', sample=SAMPLE),
 
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
-
-        
-rule fastqc:
-    input:
-        os.path.join(config['fqdir'], '{sample}.fq.gz'),
-    output:
-        html="fastqc/{sample}_fastqc.html",
-        zip="fastqc/{sample}_fastqc.zip"
-    params: ""
-    wrapper:
-        "0.17.2/bio/fastqc"
+ 
+# rule fastqc:
+#     input:
+#         os.path.join(config['fqdir'], '{sample}.fq.gz'),
+#     output:
+#         html="fastqc/{sample}_fastqc.html",
+#         zip="fastqc/{sample}_fastqc.zip"
+#     params: ""
+#     wrapper:
+#         "0.17.2/bio/fastqc"
 
         
 rule qorts:
     input:
-        bam = os.path.join(config['samdir'], '{sample}.bam'),
+        bam = os.path.join(config['bamdir'], '{sample}.bam'),
         gtf = GTF
     output:
         'qorts/{sample}'
     log:
         err = 'logs/qorts_{sample}_log.err',
         out = 'logs/qorts_{sample}_log.out'
-        
+
+    threads: 10
     params:
         defaults = config['qorts']
         
@@ -68,13 +71,14 @@ rule qorts:
         
 rule qualimap:
     input:
-        bam = os.path.join(config['samdir'], '{sample}.bam'),
+        bam = os.path.join(config['bamdir'], '{sample}.bam'),
         gtf = GTF
     output:
         'qualimap/{sample}'
     log:
         err = 'logs/qualimap_{sample}_log.err',
         out = 'logs/qualimap_{sample}_log.out'
+    threads: 10
     params:
         defaults = config['qualimap']
     shell:
@@ -83,7 +87,7 @@ rule qualimap:
 
 rule featureCount:
     input:
-        bams = expand(os.path.join(config['samdir'], '{sample}.bam'), sample=SAMPLE),
+        bams = expand(os.path.join(config['bamdir'], '{sample}.bam'), sample=SAMPLE),
         gtf = GTF
     output:
         'featureCount/counts'
@@ -102,6 +106,7 @@ rule multiqc:
         'featureCount/counts',
         expand('qorts/{sample}', sample=SAMPLE),
         expand('qualimap/{sample}', sample=SAMPLE),
+#        expand('fastqc/{sample}_fastqc.html', sample=SAMPLE),                
 
     output:
         'multiqc_report.html'
