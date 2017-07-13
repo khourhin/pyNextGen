@@ -1,10 +1,15 @@
 import glob
-import os.path
+import os
 
+# LIMITATIONS:
+# Working so far ONLY WITH '.fq.gz' fastq files !!!
 
-READS = 'reads/mini/*.fq.gz'
-SAMPLE = [ os.path.basename(x).replace('.fq.gz', '')
-           for x in glob.glob(READS)]
+GTF = config['gtf']
+IDX = config['star_index']
+SAMPLE = [os.path.basename(x.split(os.extsep)[0])
+          for x in glob.glob(os.path.join(config['fqdir'], '*fq.gz'))]
+
+print(SAMPLE)
 
 rule targets:
     input:
@@ -12,22 +17,19 @@ rule targets:
 
 rule star_single:
     input:
-        reads = ["reads/mini/{sample}.fq.gz"],
-        idx = config['idx'],
-        gtf = config['gtf'],
+        fq = os.path.join(config['fqdir'], '{sample}.fq.gz'),
+        idx = IDX,
+        gtf = GTF
         
     output:
         # see STAR manual for additional output files
         "star/{sample}_pass1_Aligned.sortedByCoord.out.bam"
     log:
-        "logs/star/{sample}.log"
-    params:
-        # path to STAR reference genome index
-        index="index",
-        # optional parameters
-        extra=""
-    threads: 5           
+        err = 'logs/star/{sample}_log.err',
+        out = 'logs/star/{sample}_log.out'
 
+    threads: 10
+             
     shell:
-        "STAR --genomeDir {input.idx} --readFilesIn {input.reads} --sjdbGTFfile {input.gtf} --outFileNamePrefix star/{wildcards.sample}_pass1_ --outSAMtype BAM SortedByCoordinate --runThreadN {threads} --readFilesCommand zcat"
+        "STAR --genomeDir {input.idx} --readFilesIn {input.fq} --sjdbGTFfile {input.gtf} --outFileNamePrefix star/{wildcards.sample}_pass1_ --outSAMtype BAM SortedByCoordinate --runThreadN {threads} --readFilesCommand zcat 1>> {log.out} 2>> {log.err}"
 
