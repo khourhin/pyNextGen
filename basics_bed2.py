@@ -41,6 +41,7 @@ def bed_stats(bedObj, genome_size):
 
     
     [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -76,7 +76,7 @@ def main(args, inp, groups, debug=False):
     for grp in groups:
 
         
-        dot_majiq = ' '.join([x + '.majiq' for x in inp if inp[x][1] == grp])
+        dot_majiq = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == grp])
         dot_splicegraph = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == grp])
         
         cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, args.threads, grp)
@@ -89,12 +89,15 @@ def main(args, inp, groups, debug=False):
         print(cmd)
 
         if not debug:
-            subprocess.check_output(cmd, shell=True)
+            # Apparently this step might not be necessary
+            #subprocess.check_output(cmd, shell=True)
+            pass
+
 
     for i,j in itertools.combinations(groups, 2):
         print(i,j)
-        dot_majiq_i = ' '.join([x + '.majiq' for x in inp if inp[x][1] == i])
-        dot_majiq_j = ' '.join([x + '.majiq' for x in inp if inp[x][1] == j])
+        dot_majiq_i = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == i])
+        dot_majiq_j = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == j])
 
         cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=args.threads)
         print(cmd)

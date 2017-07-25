@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import argparse
 import pysam
 import logging
@@ -5,9 +7,20 @@ import basics_nuc_seq as bns
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
+import click
+import os
+import pandas as pd
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+logger = logging.getLogger(os.path.basename(__file__) + " - " +  __name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.FileHandler('/home/ekornobis/logs/common.log')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(handler)
+
 
 # TODO: check if dedup_fasta can be improved using yield as in
 # /home/ekornobis/code/allemand/gphn/7.2_generate_ref_before_rsem.py
@@ -32,8 +45,8 @@ def dedup_fasta(fasta, fasta_out=None, graph=True):
             dedup_dict[seq.sequence] = [seq.name]
 
     reads_per_seq = Counter(map(lambda x: len(x), dedup_dict.values()))
-    log.info('Number of copies per reads:')
-    log.info(reads_per_seq)
+    logger.info('Number of copies per reads:')
+    logger.info(reads_per_seq)
 
     if graph:
         labels, values = zip(*reads_per_seq.items())
@@ -53,33 +66,34 @@ def dedup_fasta(fasta, fasta_out=None, graph=True):
 
     return dedup_dict
 
-
+@click.command()
+@click.argument('fasta')
 def fasta_stats(fasta):
-    log.info("Producing stats for: %s" % fasta)
+    logger.info("Producing stats for: %s" % fasta)
 
-    seq_len = []
-    GC_content = []
-    N_count = 0
+    fasta_df = pd.DataFrame({
+        'seq_names': [seq.name for seq in pysam.FastxFile(fasta)],
+        'seq_len': [len(seq.sequence) for seq in pysam.FastxFile(fasta)],
+        'GC_content': [bns.get_seq_GC(seq.sequence) for seq in pysam.FastxFile(fasta)],
+        'Ns': [seq.sequence.count('N') for seq in pysam.FastxFile(fasta)],
+    })
 
-    with pysam.FastxFile(fasta) as fa:
-        for seq in fa:
-            seq_len.append(len(seq.sequence))
-            GC_content.append(bns.get_seq_GC(seq.sequence))
-            N_count += seq.sequence.count("N")
-
-    plt.hist(seq_len)
+    print(fasta_df)
+    
+    plt.hist(fasta_df['seq_len'])
     plt.show()
 
     
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('fastaIn', help='')
-    parser.add_argument('fastaOut', help='')
-    parser.add_argument('--noGraph', help='', action='store_false')
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('fastaIn', help='')
+    # parser.add_argument('fastaOut', help='')
+    # parser.add_argument('--noGraph', help='', action='store_false')
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-#    fasta_stats(args.fas)
-    dedup_fasta(args.fastaIn, args.fastaOut, args.noGraph)
+    # fasta_stats(args.fas)
+#    dedup_fasta(args.fastaIn, args.fastaOut, args.noGraph)
+    fasta_stats()
     
