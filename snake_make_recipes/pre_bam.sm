@@ -4,23 +4,126 @@
 import glob
 import os
 
-GTF = config['gtf']
+SAMPLES = config['samples']
 
-SAMPLE = [os.path.splitext(os.path.basename(x))[0]
-          for x in glob.glob(os.path.join(config['fqdir'], '*fq'))]
+print(SAMPLES)
 
-print(SAMPLE)
+# THis is used so far only for fastqc, and not sure its completely
+# safe (snakemake log give weird results for the 'wilcard' entry)
+READ_PAIRS = '' if config['pair']=='single' else ['_1','_2']
 
 rule targets:
     input:
-        expand('qc/{sample}.html', sample=SAMPLE),
-                
+        expand('qc/{sample}{read_pairs}.html', sample=SAMPLES, read_pairs=READ_PAIRS),
+        'multiqc_report.html',
+        'featureCount/counts',        
+        config['star_index'],
+        expand('star/{sample}_pass1_SJ.out.tab', sample=SAMPLES),
+        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES)
+        
 rule fastqc:
     input:
-        os.path.join(config['fqdir'], '{sample}.fq'),
+        os.path.join(config['fqdir'], '{sample}' + '{read_pairs}' + config['fq_ext'])
+
     output:
-        html="qc/{sample}.html",
-        zip="qc/{sample}.zip"
-    params: ""
+        html = 'qc/{sample}{read_pairs}.html',
+        zip = 'qc/{sample}{read_pairs}.zip'
+    params: ''
     wrapper:
-        "0.17.2/bio/fastqc"
+        '0.17.2/bio/fastqc'
+
+        
+rule make_index:
+    input:
+        fas = config['ref_fasta'],
+        gtf = config['gtf']
+    output:
+        idx_dir = config['star_index']
+    threads: 20
+    shell:
+        'mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} 	 --sjdbGTFfile {input.gtf} --runThreadN {threads}'
+
+
+rule star_pass1:
+    input:
+        fas = config['ref_fasta'],
+        gtf = config['gtf'],
+        idx_dir = config['star_index'],
+        fqs = [os.path.join(config['fqdir'], '{sample}' + config['fq_ext'])] if config['pair']=='single' else [(os.path.join(config['fqdir'], '{sample}' + num + config['fq_ext']) for num in ('_1', '_2'))]
+
+    output:
+        'star/{sample}_pass1_SJ.out.tab'
+        
+    params:
+        extra = config['star'],
+        outprefix = 'star/{sample}_pass1_'
+        
+    threads: 10
+
+    shell:
+        'STAR --genomeDir {input.idx_dir} \
+	--sjdbGTFfile {input.gtf} \
+	--readFilesIn {input.fqs} \
+	--outSAMtype None \
+	--runThreadN {threads} \
+        --outFileNamePrefix {params.outprefix} \
+        {params.extra} '
+
+
+rule star_pass2:
+    input:
+        fas = config['ref_fasta'],
+        gtf = config['gtf'],
+        idx_dir = config['star_index'],
+        fqs = [os.path.join(config['fqdir'], '{sample}' + config['fq_ext'])] if config['pair']=='single' else [(os.path.join(config['fqdir'], '{sample}' + num +  config['fq_ext']) for num in ('_1', '_2'))],
+        juncs = expand('star/{sample}_pass1_SJ.out.tab', sample=SAMPLES)
+
+    output:
+        'star/{sample}_pass2_Aligned.sortedByCoord.out.bam',
+        
+    params:
+        extra = config['star'],
+        outprefix = 'star/{sample}_pass2_'
+        
+    threads: 10
+
+    shell:
+        'STAR --genomeDir {input.idx_dir} \
+	--sjdbGTFfile {input.gtf} \
+	--readFilesIn {input.fqs} \
+	--outSAMtype BAM SortedByCoordinate \
+	--runThreadN {threads} \
+        --outFileNamePrefix {params.outprefix} \
+	--sjdbFileChrStartEnd {input.juncs} \
+	--outSAMattributes All \
+	--limitSjdbInsertNsj 2500000 \
+        {params.extra}'
+
+
+rule featureCount:
+    input:
+        bams = expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES),
+        gtf = config['gtf']
+    output:
+        'featureCount/counts'
+    log:
+        err = 'logs/featureCount_log.err',
+        out = 'logs/featureCount_log.out'
+    threads: 10
+    params:
+        defaults = config['featureCount']
+    shell:
+        'featureCounts -T {threads} {params.defaults} -a {input.gtf} -o {output} {input.bams} 1>> {log.out} 2>> {log.err}'
+
+
+rule multiqc:
+    input:
+        'featureCount/counts',
+        expand('qc/{sample}{read_pairs}.html', sample=SAMPLES, read_pairs=READ_PAIRS),
+
+    output:
+        'multiqc_report.html'
+    shell:
+        'multiqc .'
+
+        

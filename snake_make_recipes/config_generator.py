@@ -1,13 +1,23 @@
 import logging
 import click
 import json
+import glob
+import os
+import re
 
 # Usage
 # cd /home/ekornobis/Programming/pyNextGen/snake_make_recipes/test
 # python ../config_generator.py -s stranded -p single -b ../../demo_data/ALL/bams -f ../../demo_data/ALL/fqs -g ~/data/genomes/ensembl/h_sapiens/hg37/Homo_sapiens.GRCh37.75.gtf
+
+# Other example with paired data
+# python ../config_generator.py -s stranded -p paired -f ~/data/demo/mus_musculus/fqs/ -i ~/data/genomes/ensembl/m_musculus/GRCm38/star_index -r ~/data/genomes/ensembl/m_musculus/GRCm38/Mus_musculus.GRCm38.dna_sm.toplevel.fa -g ~/data/genomes/ensembl/m_musculus/GRCm38/Mus_musculus.GRCm38.87.gtf
+
 # snakemake --cores 20 -s ../post_bam.sm --configfile snakemake.json
 # Limitations
 # Check the CMD_OPTIONS dictionnary for adding other programs
+
+# ASSUMPTIONS:
+# Paired file names are named as SAMPLE_1.* SAMPLE_2.*
 
 
 logger = logging.getLogger(__name__)
@@ -54,6 +64,10 @@ class Job():
         for prog in CMD_OPTIONS:
             self.params[prog] = ' '.join([CMD_OPTIONS[prog][self.params[p]] for p in ['pair', 'strand']])
 
+        self.params['samples'], self.params['fq_ext'] = self.get_sample_names()
+
+        if self.params['fq_ext'].endswith('.gz'):
+            self.params['star'] = '--readFilesCommand zcat'
             
     def __repr__(self):
         return "Job object: {0}".format(self.params)
@@ -64,7 +78,32 @@ class Job():
         with open(json_out, 'w') as out:
             out.write(json.dumps(self.params, indent=4))
 
+    def get_sample_names(self):
 
+        # Extract fastq extension from fqdir files to specify it later in snakemake file
+        extensions = ('*.fq', '*.fq.gz', '*.fastq', '*.fastq.gz')
+        ext = [ext[1:] for ext in extensions
+               if len(glob.glob(os.path.join(self.params['fqdir'], ext))) != 0]
+        if len(ext) != 1:
+            raise IOError('Either no known fastqs extension in {0} or more than one extension. Extensions found:{1}'.format(self.params['fqdir'], ext))
+
+        ext = ext[0]
+        logger.debug('Fastq extension found: "{}"'.format(ext))
+
+        # List samples names for later use in snakemake file        
+        if self.params['pair'] == 'paired':
+            
+            samples = list({re.sub('_[12]$', '', os.path.basename(x).replace(ext,'')) 
+                       for x in glob.glob(os.path.join(self.params['fqdir'], '*' + ext))})
+        else:
+            samples = [os.path.basename(x).replace(ext,'')
+                       for x in glob.glob(os.path.join(self.params['fqdir'], '*' + ext))]
+
+        logger.debug('Samples: {}'.format(samples))
+
+        return(samples, ext)
+
+        
 @click.command()
 @click.option('--bamdir','-b', default=None, type=click.Path(exists=True, resolve_path=True),
               help='Path to the bam directory.')
@@ -78,9 +117,10 @@ class Job():
               help='Path to the json output.')
 @click.option('--gtf', '-g', default=None, type=click.Path(exists=True, resolve_path=True), required=True,
               help='Path to the gtf annotation file.')
-@click.option('--star_index','-i', default=None, type=click.Path(exists=True, resolve_path=True),
+@click.option('--star_index','-i', default=None, type=click.Path(resolve_path=True),
               help='Path to the star index directory.')
-
+@click.option('--ref_fasta','-r', default=None, type=click.Path(exists=True, resolve_path=True),
+              help='Path to the reference genome fasta.')
 def main(**kwargs):
     """A simple parser to get NGS library information
     """
@@ -88,6 +128,7 @@ def main(**kwargs):
     job = Job(**kwargs)
     logger.info("Initializing: {0}".format(job))
     job.generate_config(kwargs['json_out'])
+    job.get_sample_names()
 
     
 if __name__ == '__main__':
