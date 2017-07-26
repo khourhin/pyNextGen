@@ -23,7 +23,7 @@ import re
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-handler = logging.FileHandler('/home/ekornobis/logs/config_generator.log')
+handler = logging.FileHandler(os.path.expanduser('~/logs/config_generator.log'))
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
