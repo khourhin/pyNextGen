@@ -29,8 +29,9 @@ rule fastqc:
         html = 'qc/{sample}{read_pairs}.html',
         zip = 'qc/{sample}{read_pairs}.zip'
     params: ''
-    wrapper:
-        '0.17.2/bio/fastqc'
+
+    shell:
+        'fastqc --quiet --outdir qc {input}'
 
         
 rule make_index:
