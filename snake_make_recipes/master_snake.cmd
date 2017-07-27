@@ -16,6 +16,6 @@ SM=pre_bam.sm
 CLUS_CONF=cluster.conf
 
 # This configuration file can be create with config_generator.py
-SM_JSON=snakemake.json
+SM_JSON=snakemake_tars_conf_example.json
 
 snakemake -j 10 --cluster-config $CLUS_CONF --cluster "sbatch -t {cluster.time}" -s $SM --configfile $SM_JSON
