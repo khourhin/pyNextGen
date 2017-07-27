@@ -1,0 +1,23 @@
+{
+    "fqdir": "/pasteur/entites/Epigen/ekornobis/data/demo/c_elegans/mini",
+    "strand": "stranded",
+    "pair": "single",
+    "gtf": "/pasteur/entites/Epigen/genomes_EK/c_elegans/Caenorhabditis_elegans.WBcel235.87.gtf",
+    "star_index": "/pasteur/entites/Epigen/genomes_EK/c_elegans/star_index",
+    "ref_fasta": "/pasteur/entites/Epigen/genomes_EK/c_elegans/Caenorhabditis_elegans.WBcel235.dna.toplevel.fa",
+    "bamdir": null,
+    "json_out": "snakemake.json",
+    "qorts": "--singleEnded --stranded --stranded_fr_secondstrand",
+    "qualimap": " -p strand-specific-forward",
+    "featureCount": " -s 1",
+    "samples": [
+        "SRR019726",
+        "SRR019722",
+        "SRR019724",
+        "SRR019721",
+        "SRR019725",
+        "SRR019723"
+    ],
+    "fq_ext": ".fq.gz",
+    "star": "--readFilesCommand zcat"
+}
