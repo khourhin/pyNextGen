@@ -59,7 +59,7 @@ rule star_pass1:
         extra = config['star'],
         outprefix = 'star/{sample}_pass1_'
         
-    threads: 10
+    threads: 12
 
     shell:
         'STAR --genomeDir {input.idx_dir} \
@@ -86,7 +86,7 @@ rule star_pass2:
         extra = config['star'],
         outprefix = 'star/{sample}_pass2_'
         
-    threads: 10
+    threads: 12
 
     shell:
         'STAR --genomeDir {input.idx_dir} \
@@ -110,7 +110,7 @@ rule featureCount:
     log:
         err = 'logs/featureCount_log.err',
         out = 'logs/featureCount_log.out'
-    threads: 10
+    threads: 12
     params:
         defaults = config['featureCount']
     shell:
