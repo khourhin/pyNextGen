@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # Now using pybedtools
 from pybedtools import BedTool
 import argparse
@@ -5,9 +7,21 @@ import logging as log
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import click
+import logging
+import os
+from itertools import combinations
+from multiprocessing import Pool
+import pandas as pd
 
-log.basicConfig(filename='example.log', level=log.INFO)
-log.getLogger().addHandler(log.StreamHandler())
+logger = logging.getLogger(os.path.basename(__file__) + " - " +  __name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)
 
 
 def get_genome_coverage(bedObj, genome_size):
@@ -40,14 +54,58 @@ def bed_stats(bedObj, genome_size):
     }
 
     
-    [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+    [logger.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+
+    
+def count_intersections(bed_tuple):
+    """Return a normalized (by the total number of feature of both beds)
+    intersetion counts
+    """
+
+    bed1 = bed_tuple[0]
+    bed2 = bed_tuple[1]
+    
+    logger.info('Comparing: {0} VS {1}'.format(bed1.fn, bed2.fn))
+
+    bed_inter = bed1.intersect(bed2)
+
+    # Normnalized number of intersections
+    # (divided by the total number of features in both files)
+    
+    return(bed1.fn,
+           bed2.fn,
+           len(bed_inter) / (len(bed1) + len(bed2)))
+
+
+def count_all_intersections(beds):
+
+    p = Pool(20)
+    inter_df = p.map(count_intersections, combinations(beds, 2))
+    inter_df = pd.DataFrame(inter_df)
+
+    return(inter_df)
+
+    
+@click.command()
+@click.argument('beds', required=True, nargs=-1)
+@click.option('--genome_size', type=int)
+def main(beds, genome_size):
+
+    beds = (BedTool(bed) for bed in beds)
+    inter_df = count_all_intersections(beds)
+    inter_df.to_csv('out.csv')
 
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('bed', help='A bed file')
-    parser.add_argument('genome_size', type=int, help='The total number of bases of the considered genome')
-    args = parser.parse_args()
+    main()
 
-    bedObj = BedTool(args.bed)
-    bed_stats(bedObj, args.genome_size)
+    
+    # FOR LEGACY, TO RECONNECT PAST FUNCTION (NOT WORKING NOW)
+    
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('bed', help='A bed file')
+    # parser.add_argument('genome_size', type=int, help='The total number of bases of the considered genome')
+    # args = parser.parse_args()
+
+    # bedObj = BedTool(args.bed)
+    # bed_stats(bedObj, args.genome_size)
