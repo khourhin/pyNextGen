@@ -21,4 +21,9 @@ CLUS_CONF=cluster.conf
 # This configuration file can be create with config_generator.py
 SM_JSON=snakemake_tars_conf_example.json
 
-snakemake -j 12 --cluster-config $CLUS_CONF --cluster "sbatch -t {cluster.time}" -s $SM --configfile $SM_JSON
+# Logs directory (HAS TO FINISH WITH "/")
+
+LOGS_DIR=~/logs/snakemake/$(date +%Y-%m-%d-%H-%M-%S)/;
+mkdir $LOGS_DIR
+
+snakemake -j 12 --printshellcmds --cluster-config $CLUS_CONF --cluster "sbatch --qos {cluster.qos} --ntasks {cluster.tasks} --cpus-per-task {cluster.cpus} --job-name {cluster.jobName} --output $LOGS_DIR{cluster.output} --error $LOGS_DIR{cluster.error}" -s $SM --configfile $SM_JSON

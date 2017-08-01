@@ -14,7 +14,7 @@ READ_PAIRS = '' if config['pair']=='single' else ['_1','_2']
 
 rule targets:
     input:
-        expand('qc/{sample}{read_pairs}.html', sample=SAMPLES, read_pairs=READ_PAIRS),
+        expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
         'multiqc_report.html',
         'featureCount/counts',        
         config['star_index'],
@@ -26,8 +26,8 @@ rule fastqc:
         os.path.join(config['fqdir'], '{sample}' + '{read_pairs}' + config['fq_ext'])
 
     output:
-        html = 'qc/{sample}{read_pairs}.html',
-        zip = 'qc/{sample}{read_pairs}.zip'
+        html = 'qc/{sample}{read_pairs}_fastqc.html',
+        zip = 'qc/{sample}{read_pairs}_fastqc.zip'
     params: ''
 
     shell:
@@ -120,7 +120,7 @@ rule featureCount:
 rule multiqc:
     input:
         'featureCount/counts',
-        expand('qc/{sample}{read_pairs}.html', sample=SAMPLES, read_pairs=READ_PAIRS),
+        expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
 
     output:
         'multiqc_report.html'
