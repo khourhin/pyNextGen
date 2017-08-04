@@ -77,7 +77,6 @@ def main(args, inp, groups, debug=False):
 
         
         dot_majiq = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == grp])
-        dot_splicegraph = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == grp])
         
         cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, args.threads, grp)
         print(cmd)
@@ -85,7 +84,7 @@ def main(args, inp, groups, debug=False):
         if not debug:
             subprocess.check_output(cmd, shell=True)
 
-        cmd = 'voila psi psi_{0}/{0}_psigroup.pickle -splice-graphs1 {1} -o voila_{0}'.format(grp, dot_splicegraph)
+        cmd = 'voila psi psi_{0}/{0}.deltapsi.voila -splice-graph splicegraph.hdf5 -o voila_{0}'.format(grp)
         print(cmd)
 
         if not debug:
@@ -104,11 +103,8 @@ def main(args, inp, groups, debug=False):
 
         if not debug:
             subprocess.check_output(cmd, shell=True)
-
-        dot_splicegraph_i = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == i])
-        dot_splicegraph_j = ' '.join([x + '.splicegraph' for x in inp if inp[x][1] == j])
             
-        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi_quantify.pickle -splice-graphs1 {splice_i} -splice-graphs2 {splice_j} -o voila_{i}_{j}'.format(i=i, j=j, splice_i=dot_splicegraph_i, splice_j=dot_splicegraph_j)
+        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi.voila -splice-graph splicegraph.hdf5 -o voila_{i}_{j}'.format(i=i, j=j)
 
         print(cmd)
         if not debug:
