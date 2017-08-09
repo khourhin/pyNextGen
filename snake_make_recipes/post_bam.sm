@@ -4,15 +4,6 @@
 # OR
 #snakemake --cores 4 -s post_bam.sm --configfile config_seqherv.json
 
-# ASSUMPTIONS
-# QORTS:
-# reads UNSTRANDED AND PAIRED
-# Otherwise
-# --singleEnded
-# --stranded (reverse stranded in HTSEQ nomenclature)
-# --stranded_fr_secondstrand (stranded in HTSEQ nomenclature)
-
-
 # Qorts can ask for a lot of memory if paired with broken pairs (keeps the
 # singletons in memory)
 
@@ -94,7 +85,6 @@ rule multiqc:
         'featureCount/counts',
         expand('qorts/{sample}', sample=SAMPLE),
         expand('qualimap/{sample}', sample=SAMPLE),
-#        expand('fastqc/{sample}_fastqc.html', sample=SAMPLE),                
 
     output:
         'multiqc_report.html'
