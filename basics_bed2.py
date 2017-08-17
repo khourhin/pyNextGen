@@ -81,7 +81,7 @@ def count_all_intersections(beds):
 
     p = Pool(20)
     inter_df = p.map(count_intersections, combinations(beds, 2))
-    inter_df = pd.DataFrame(inter_df)
+    inter_df = pd.DataFrame(inter_df, columns=['bed1', 'bed2', 'normCounts'])
 
     return(inter_df)
 
@@ -93,7 +93,7 @@ def main(beds, genome_size):
 
     beds = (BedTool(bed) for bed in beds)
     inter_df = count_all_intersections(beds)
-    inter_df.to_csv('out.csv')
+    inter_df.to_csv('out2.csv')
 
     
 if __name__ == "__main__":

@@ -62,7 +62,20 @@ def overall_mapped_bases_composition(bam):
     for k, v in all_counts.items():
         log.info('{0}: {1}'.format(k, v))
 
+        
+def get_region_coverage(interval, bam):
+    """
+    From a bam file, get the coverage for each bases in an interval
+    (as in pyBedtools interval ie with interval.chrom, interval.start,
+    interval.end)
+    """
 
+    samfile = pysam.AlignmentFile(bam, 'rb')
+
+    for x in samfile.pileup(interval.chrom, interval.start, interval.end):
+        print(str(x))
+
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('bam', help='The path to a bam file')

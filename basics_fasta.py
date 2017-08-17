@@ -78,9 +78,10 @@ def fasta_stats(fasta):
         'Ns': [seq.sequence.count('N') for seq in pysam.FastxFile(fasta)],
     })
 
-    print(fasta_df)
+    print(fasta_df.to_csv())
     
     plt.hist(fasta_df['seq_len'])
+    plt.title('Sequence length frequencies')
     plt.show()
 
     
