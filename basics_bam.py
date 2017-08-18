@@ -63,7 +63,7 @@ def overall_mapped_bases_composition(bam):
         logger.info('{0}: {1}'.format(k, v))
 
         
-def write_region_coverage(interval, bam):
+def write_region_coverage(interval, bam, flank):
     """
     From a bam file, get the coverage for each bases in an interval
     (as in pyBedtools interval ie with interval.chrom, interval.start,
@@ -77,8 +77,8 @@ def write_region_coverage(interval, bam):
     with open('test_' + simplify_path(bam) + "_" + interval.name, 'w') as f:
         for base_cov in pysamstats.stat_coverage(sam,
                                                  chrom=interval.chrom,
-                                                 start=interval.start,
-                                                 end=interval.end,
+                                                 start=interval.start - flank,
+                                                 end=interval.end + flank,
                                                  truncate=True, pad=True):
             f.write('{chrom}\t{pos}\t{reads_all}\t{reads_pp}\n'.format(**base_cov))
 
