@@ -1,13 +1,13 @@
 import argparse
 import logging as log
 from collections import Counter
-from multiprocessing import Pool
-
+from mylog import get_logger
 import pysam
+import pysamstats
+from utils import apply_threads, simplify_path
+import os
 
-log.basicConfig(filename='example.log', level=log.INFO)
-log.getLogger().addHandler(log.StreamHandler())
-p = Pool(10)
+logger = get_logger(__file__, __name__)
 
 # IN DVPT
 
@@ -60,22 +60,29 @@ def overall_mapped_bases_composition(bam):
                   sum(all_counts.values()) for k in all_counts}
 
     for k, v in all_counts.items():
-        log.info('{0}: {1}'.format(k, v))
+        logger.info('{0}: {1}'.format(k, v))
 
         
-def get_region_coverage(interval, bam):
+def write_region_coverage(interval, bam):
     """
     From a bam file, get the coverage for each bases in an interval
     (as in pyBedtools interval ie with interval.chrom, interval.start,
     interval.end)
     """
 
-    samfile = pysam.AlignmentFile(bam, 'rb')
+    sam = pysam.AlignmentFile(bam, 'rb')
+    logger.debug("Interval: {}:{}-{}".format(interval.chrom,
+                                             interval.start, interval.end))
 
-    for x in samfile.pileup(interval.chrom, interval.start, interval.end):
-        print(str(x))
+    with open('test_' + simplify_path(bam) + "_" + interval.name, 'w') as f:
+        for base_cov in pysamstats.stat_coverage(sam,
+                                                 chrom=interval.chrom,
+                                                 start=interval.start,
+                                                 end=interval.end,
+                                                 truncate=True, pad=True):
+            f.write('{chrom}\t{pos}\t{reads_all}\t{reads_pp}\n'.format(**base_cov))
 
-        
+                
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('bam', help='The path to a bam file')

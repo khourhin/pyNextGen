@@ -1,45 +1,41 @@
 import click
-from basics_bam import get_region_coverage
+from basics_bam import write_region_coverage
 from mylog import get_logger
 import glob
 import os
 from pybedtools import BedTool
+from multiprocessing import Pool
+
 
 logger = get_logger(__file__, __name__)
 
 
-def get_regions_coverages(bams, bed):
+def get_all_coverages(bams, bed, threads):
     """
     Get coverages for all regions in the 'bed' file for each bam
     present in 'bam_dir'
     """
+
+    p = Pool(threads)
+    
     logger.debug('Checking bams: {}'.format(bams))
 
     for bam in bams:
-        for interval in bed:
-
-            with open('test' + interval.name, 'w') as f:
+    
+        p.starmap(write_region_coverage, ((interval, bam) for interval in bed))
             
-                for i in get_region_coverage(interval, bam):
-                    f.write(i)
-
-
-
-
     
 @click.command()
 @click.argument('bam_dir', type=click.Path(exists=True))
 @click.argument('bed', type=click.Path(exists=True))
+@click.option('--threads', type=int, default=1)
 def main(**kwargs):
     
     logger.debug(kwargs)
     bed = BedTool(kwargs['bed'])
     bams = glob.glob(os.path.join(kwargs['bam_dir'], '*.bam'))
-
-    get_region_coverage(bed[0], bams[0])
-        
     
-#    get_regions_coverages(kwargs['bam_dir'], bed)
+    get_all_coverages(bams, bed, kwargs['threads'])
 
     
 if __name__ == '__main__':
