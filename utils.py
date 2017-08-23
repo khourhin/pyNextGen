@@ -1,4 +1,7 @@
 import os
+import mylog
+
+logger = mylog.get_logger(__file__, __name__)
 
 def apply_threads(func, arg_list, nthreads=10):
     p = Pool(nthreads)
