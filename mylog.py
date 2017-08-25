@@ -6,7 +6,7 @@ from colorlog import ColoredFormatter
 
 def get_logger(f, n):
 
-    logger = logging.getLogger(os.path.basename(f) + " - " +  n)
+    logger = logging.getLogger(os.path.basename(f) + " - " + n)
     logger.setLevel(logging.DEBUG)
 
     handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
@@ -24,17 +24,19 @@ def get_logger(f, n):
         secondary_log_colors={},
         style='%'
     )
-    
+
     handler.setFormatter(formatter)
 
     # add the handlers to the logger
     logger.addHandler(handler)
-    
+
     return logger
+
 
 if __name__ == '__main__':
     logger = get_logger(__file__, __name__)
-    logger.info("This is info")
     logger.debug("This is debug")
+    logger.info("This is info")
+    logger.warning("This is warning")
     logger.error("This is error")
     logger.critical("This is critical")
