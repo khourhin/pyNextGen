@@ -1,4 +1,3 @@
-import logging
 import numpy
 import pysam
 import collections
@@ -7,20 +6,9 @@ import basics_nuc_seq as bns
 from multiprocessing import Pool
 import argparse
 import os
+from mylog import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-handler = logging.FileHandler('basics_fastq.log')
-handler.setLevel(logging.INFO)
-
-# create a logging format
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-# add the handlers to the logger
-logger.addHandler(handler)
+logger = get_logger(__file__, __name__)
 
 
 def iterate_fastq(fastq):
@@ -39,9 +27,9 @@ def filter_fastq(fastq, filter_fun):
     for read in iterate_fastq(fastq):
         if filter_fun(read):
             filtered_reads.add(read.name)
-            log.debug(read)
+            logger.debug(read)
 
-    log.info('Done filtering {}'.format(fastq))
+    logger.info('Done filtering {}'.format(fastq))
     return filtered_reads
 
 
@@ -77,7 +65,7 @@ def print_filter_fastq(fastq, read_set):
             if read.name in read_set:
                 fout.write(str(read) + '\n')
 
-    log.info("Written filtered fastq to {}".format(fastq_out))
+    logger.info("Written filtered fastq to {}".format(fastq_out))
 
 
 def fastq_stats(fastq):
@@ -139,11 +127,11 @@ def filter_polyA_reverse_stranded_reads(fq1, fq2):
     STRANDED PAIRED DATA.
     """
 
-    log.info("Starting polyA selection with pair: {0}; {1}".format(fq1, fq2))
+    logger.info("Starting polyA selection with pair: {0}; {1}".format(fq1, fq2))
     read_set1 = filter_fastq(fq1, has_polyT)
-    log.info('Found {0} polyT hits in {1}'.format(len(read_set1), fq1))
+    logger.info('Found {0} polyT hits in {1}'.format(len(read_set1), fq1))
     read_set2 = filter_fastq(fq2, has_polyA)
-    log.info('Found {0} polyA hits in {1}'.format(len(read_set2), fq2))
+    logger.info('Found {0} polyA hits in {1}'.format(len(read_set2), fq2))
     read_set = read_set1 | read_set2
 
     print_filter_fastq(fq1, read_set)

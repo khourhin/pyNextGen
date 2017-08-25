@@ -1,9 +1,8 @@
 import argparse
-import logging as log
 from pybiomart import Dataset
+from mylog import get_logger
 
-log.basicConfig(filename='example.log', level=log.INFO)
-log.getLogger().addHandler(log.StreamHandler())
+logger = get_logger(__file__, __name__)
 
 # SO FAR WORKING ONLY FOR HUMANS 
 
@@ -25,7 +24,3 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('', help='')
     args = parser.parse_args()
-
-
-
-

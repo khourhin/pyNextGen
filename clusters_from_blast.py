@@ -3,16 +3,16 @@ from collections import Counter
 import numpy as np
 import pysam
 import os
-import logging
 import sys
 import basics_bam as bb
+from mylog import get_logger
+
+logger = get_logger(__file__, __name__)
+
+
 
 ######## BADDDDDDDDDD
 #### CHANGE THE RANGE IN GET_ISOFORM CODE for it to be dynamic
-
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
-
 
 def get_isoform_code(exon_list, nExons):
 
@@ -49,7 +49,7 @@ def get_clusters_from_blast(blast_out):
         clus_dict[i] = [x for x in res_dict if res_dict[x] == i]
 
     freqs = Counter([len(x) for x in clus_dict.values()])
-    log.info(freqs)
+    logger.info(freqs)
 
     plt.bar(freqs.keys(), np.log(freqs.values()) + 1, width=1)
     plt.xlabel("Number of read in a cluster")
@@ -88,7 +88,7 @@ def get_clusters_from_transcript_blast(blastout):
         clus_dict[v] = clus_dict.get(v, [])
         clus_dict[v].append(k)
 
-    log.info('# Clusters: {}'.format(len(clus_dict)))
+    logger.info('# Clusters: {}'.format(len(clus_dict)))
 
     return clus_dict
 
@@ -98,7 +98,7 @@ def get_cluster_stat(clus_dict):
     """
     
     clusters_sup1 = [clus for clus in clus_dict if len(clus_dict[clus]) > 1]
-    log.info("Number of blast clusters generated: {}".format(len(clusters_sup1)))
+    logger.info("Number of blast clusters generated: {}".format(len(clusters_sup1)))
 
     
 def get_fastas_from_clusters(in_fasta, clus_dict, nExons=None):

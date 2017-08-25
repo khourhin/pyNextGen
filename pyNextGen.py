@@ -1,8 +1,9 @@
-import logging
 import basics_fastq as bfq
 import sys
 import clusters_from_blast as cfb
+from mylog import get_logger
 
+logger = get_logger(__file__, __name__)
 
 # Checked 'click' library for parameters handling. Sounds super cool
 # but visibly cannot deal with multiple arguments (max number not
@@ -23,9 +24,6 @@ def blast_clustering(blastout, fasta, bam, nExons):
 #    cfb.get_bams_from_cluster(bam, clus_dict, nExons)
 
 if __name__ == "__main__":
-
-    # logging.basicConfig(level=logging.ERROR)
-    logging.basicConfig(level=logging.INFO)
 
     # Fastq Stats
     fastq_stats(sys.argv[1:])

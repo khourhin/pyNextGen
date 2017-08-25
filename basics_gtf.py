@@ -1,13 +1,12 @@
 import argparse
-import logging
 import os
 from collections import Counter
 import gffutils
 import matplotlib.pyplot as plt
 import numpy as np
+from mylog import get_logger
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger(__name__)
+logger = get_logger(__file__, __name__)
 
 
 def create_db(gtf, dbfn):
@@ -15,7 +14,7 @@ def create_db(gtf, dbfn):
     From a 'gtf' file, create a 'dbfn' sqlite database.
     """
 
-    log.info('Creating db')
+    logger.info('Creating db')
 
     gffutils.create_db(gtf, dbfn=dbfn, force=True,  # Delete db if already exist
                        merge_strategy='merge',
@@ -24,7 +23,7 @@ def create_db(gtf, dbfn):
                                 'transcript': 'transcript_id'},
                        disable_infer_transcripts=True,
                        disable_infer_genes=True)
-    log.info('db done')
+    logger.info('db done')
 
 
 def filter_by_attribute(attr_in, dbfn):
@@ -40,7 +39,7 @@ def filter_by_attribute(attr_in, dbfn):
 def get_introns(dbfn, out_gtf):
 
     db = gffutils.FeatureDB(dbfn)
-    log.info('Calculating introns')
+    logger.info('Calculating introns')
     introns = db.create_introns()
 
     # Write gff will not work here, so using a simple loop
@@ -59,7 +58,7 @@ def get_exons(dbfn, genes):
     print("gene_name\tensID\texonID\tchrom\tstart\tstop\tlength\tstrand")
 
     for i, gene in enumerate(genes, start=1):
-        log.debug("Printing exon for gene: {}".format(gene))
+        logger.debug("Printing exon for gene: {}".format(gene))
         ex_start = None
         ex_stop = None
 
@@ -83,7 +82,7 @@ def get_exons(dbfn, genes):
             ))
         # Or complete report
         # print(dir(exon))
-    log.debug("Total number of gene checked: {}".format(i))
+    logger.debug("Total number of gene checked: {}".format(i))
 
 
 def get_stats(dbfn):
@@ -105,7 +104,7 @@ def get_stats(dbfn):
     plt.xticks(index, labels, rotation=90)
     plt.show()
 
-    [log.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+    [logger.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
 
 
 def main():
@@ -133,7 +132,7 @@ def main():
     if not os.path.isfile(dbfn):
         create_db(args.gtf, dbfn)
     else:
-        log.info("Using already available database: {}".format(dbfn))
+        logger.info("Using already available database: {}".format(dbfn))
 
     if args.filter:
         filter_by_attribute(args.filter, dbfn)

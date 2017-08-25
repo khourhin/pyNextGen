@@ -4,6 +4,10 @@ import json
 import glob
 import os
 import re
+from mylog import get_logger
+
+logger = get_logger(__file__, __name__)
+
 
 # Usage
 # cd /home/ekornobis/Programming/pyNextGen/snake_make_recipes/test
@@ -19,14 +23,6 @@ import re
 # ASSUMPTIONS:
 # Paired file names are named as SAMPLE_1.* SAMPLE_2.*
 
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-handler = logging.FileHandler(os.path.expanduser('~/logs/config_generator.log'))
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 CMD_OPTIONS = {
     'qorts': {'single': '--singleEnded',
@@ -124,7 +120,7 @@ class Job():
 def main(**kwargs):
     """A simple parser to get NGS library information
     """
-    
+
     job = Job(**kwargs)
     logger.info("Initializing: {0}".format(job))
     job.generate_config(kwargs['json_out'])

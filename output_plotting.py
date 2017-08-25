@@ -1,12 +1,14 @@
+#! /usr/bin/env python3
+
 import argparse
-import logging as log
 import pandas as pd
 import filehandling
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
+from mylog import get_logger
 
-log.basicConfig(filename='example.log', level=log.DEBUG)
-log.getLogger().addHandler(log.StreamHandler())
+logger = get_logger(__file__, __name__)
+
 
 def plot_featureCount_output(prefix):
     """
@@ -16,7 +18,7 @@ def plot_featureCount_output(prefix):
     """
 
     feat_summary = prefix + '.summary'
-    log.info('Checking: {}'.format(feat_summary))
+    logger.info('Checking: {}'.format(feat_summary))
 
     df = pd.read_csv(feat_summary, sep='\t', index_col=0)
     df.columns = [filehandling.simplify_path(x) for x in df.columns]
@@ -31,13 +33,17 @@ def compare_sets(set_file):
         for line in f:
             set_list.append(set(line.split()))
         
-    log.debug('Set List:{}'.format(set_list))
-    
+    logger.debug('Set List:{}'.format(set_list))
+    print(len(set_list))
     if len(set_list) == 2:
         venn2(set_list)
-    if len(set_list) == 3:
+    elif len(set_list) == 3:
         venn3(set_list)
+    else:
+        raise IOError('Apparently, neither 2 or 3 sets to compare.')
     plt.show()
+    
+    
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -50,3 +56,5 @@ if __name__ == "__main__":
 
     if args.setCompare:
         compare_sets(args.setCompare)
+
+        

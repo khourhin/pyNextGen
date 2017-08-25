@@ -1,13 +1,11 @@
-import logging
 import subprocess
 import os
 import argparse
+from mylog import get_logger
+
+logger = get_logger(__file__, __name__)
 
 # For starter only work with single reads
-
-
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
 
 
 def get_gdir(gfas):
@@ -35,7 +33,7 @@ def star_index(gfas, nthreads):
            '--genomeDir {0} '
            '--genomeFastaFiles {1} '
            '--runThreadN {2}').format(gdir, gfas, nthreads)
-    log.info('Executing cmd:' + cmd)
+    logger.info('Executing cmd:' + cmd)
 
     p = subprocess.check_output(cmd, shell=True)
     print(p)
@@ -50,7 +48,7 @@ def star_align_1pass(gfas, gtf, read_list1, nthreads):
     if not os.path.exists(gdir):
         star_index(gfas, nthreads)
     else:
-        log.info("Using index already present in {}".format(gdir))
+        logger.info("Using index already present in {}".format(gdir))
 
     for rd in read_list1:
         outdir = 'star_out'
@@ -59,7 +57,7 @@ def star_align_1pass(gfas, gtf, read_list1, nthreads):
             raise IOError("The directory {} already exists. To not overwrite it, Star alignment is canceled.".format(outdir))
         os.makedirs(outdir)
         prefix = os.path.join(outdir, os.path.splitext(os.path.basename(rd))[0])
-        log.info("Starting mapping read:{}".format(rd))
+        logger.info("Starting mapping read:{}".format(rd))
         cmd = ('STAR '
                '--genomeDir {0} '
                '--sjdbGTFfile {1} '               
@@ -67,10 +65,10 @@ def star_align_1pass(gfas, gtf, read_list1, nthreads):
                '--outFileNamePrefix {3} '
                '--outSAMtype BAM SortedByCoordinate '
                '--runThreadN {4}').format(gdir, gtf, rd, prefix, nthreads)
-        log.info('Executing cmd:' + cmd)
+        logger.info('Executing cmd:' + cmd)
 
         p = subprocess.check_output(cmd, shell=True)
-        log.info(p)
+        logger.info(p)
 
 
 if __name__ == '__main__':

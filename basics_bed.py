@@ -1,12 +1,11 @@
 # remember that pybedtools exists !!
-import logging
 import random
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from mylog import get_logger
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+logger = get_logger(__file__, __name__)
 
 
 class BedInterval():

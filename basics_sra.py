@@ -1,10 +1,9 @@
 import argparse
 import subprocess
-import logging
+from mylog import get_logger
 from multiprocessing import Pool
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger(__name__)
+logger = get_logger(__file__, __name__)
 
 # USAGE EX:
 #cd /home/ekornobis/analysis/batsche/methyleu/2.0_pileuping
@@ -48,7 +47,7 @@ def get_bam_for_gene(sra, gene, flank):
     basics_ensembl. Refactoring is NEEDED.
 
     """
-    log.info(gene)
+    logger.info(gene)
     
     # sratool-kit use ncbi "chr" notation for chromosome names
     # So add it if not present
@@ -61,7 +60,7 @@ def get_bam_for_gene(sra, gene, flank):
                                                                                                    end=gene.end + flank,
                                                                                                    bam=bam,
                                                                                                    sra=sra)
-    log.info(cmd)
+    logger.info(cmd)
     subprocess.check_output(cmd, shell=True)
     
 def get_all_bams(sra, gene_ids, flank):
@@ -70,7 +69,7 @@ def get_all_bams(sra, gene_ids, flank):
     with open(gene_ids, 'r') as f:
         for line in f:
             g = Gene(line)
-            log.debug('Fetching SRA: {0}, for gene: {1} with flanking of {2}'.format(sra, g.gene_name, flank))            
+            logger.debug('Fetching SRA: {0}, for gene: {1} with flanking of {2}'.format(sra, g.gene_name, flank))            
             get_bam_for_gene(sra, g, flank)
         
 def main():    

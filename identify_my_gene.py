@@ -1,11 +1,17 @@
 import mygene
-import mylog
+from mylog import get_logger
 import click
+import sys
 
-logger = mylog.get_logger(__file__, __name__)
+logger = get_logger(__file__, __name__)
+
+# USAGE EXAMPLE (from stdin)
+# cut -f2 gene_list_common_aslt_event_EB.tab | python ~/Programming/pyNextGen/identify_my_gene.py -
 
 # WARNING SPECIFICI Working for hg19 now !!!
-# But easily modified
+
+# For now working only with entrez or ensembl IDs, but can be much
+# more with mg.querymany. But easily modified.
 
 
 def annotate_genes(genes):
@@ -13,9 +19,9 @@ def annotate_genes(genes):
     """
 
     mg = mygene.MyGeneInfo()
-    res = mg.getgenes(genes, fields='symbol,name,genomic_pos_hg19', as_dataframe=True)
+    res = mg.getgenes(genes, fields='symbol,name,taxid,genomic_pos_hg19', as_dataframe=True)
 
-    print(res)
+    return(res.to_csv(sys.stdout))
 
     
 @click.command()

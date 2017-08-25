@@ -3,7 +3,6 @@
 # Now using pybedtools
 from pybedtools import BedTool
 import argparse
-import logging as log
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,15 +12,9 @@ import os
 from itertools import combinations
 from multiprocessing import Pool
 import pandas as pd
+from mylog import get_logger
 
-logger = logging.getLogger(os.path.basename(__file__) + " - " +  __name__)
-logger.setLevel(logging.DEBUG)
-
-handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-logger.addHandler(handler)
+logger = get_logger(__file__, __name__)
 
 
 def get_genome_coverage(bedObj, genome_size):

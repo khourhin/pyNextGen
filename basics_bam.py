@@ -1,5 +1,4 @@
 import argparse
-import logging as log
 from collections import Counter
 from mylog import get_logger
 import pysam
@@ -20,7 +19,7 @@ def open_bam(bam):
     with pysam.AlignmentFile(bam, 'rb') as f:
         for i, read in enumerate(f):
             if i % 1000000 == 0:
-                log.info("Reached {} reads.".format(i))
+                logger.info("Reached {} reads.".format(i))
             yield read
 
 
@@ -74,7 +73,7 @@ def write_region_coverage(interval, bam, flank):
     logger.debug("Interval: {}:{}-{}".format(interval.chrom,
                                              interval.start, interval.end))
 
-    with open('test_' + simplify_path(bam) + "_" + interval.name, 'w') as f:
+    with open('coverage_' + simplify_path(bam) + "_" + interval.name, 'w') as f:
         for base_cov in pysamstats.stat_coverage(sam,
                                                  chrom=interval.chrom,
                                                  start=interval.start - flank,

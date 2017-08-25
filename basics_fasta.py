@@ -2,7 +2,6 @@
 
 import argparse
 import pysam
-import logging
 import basics_nuc_seq as bns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,17 +9,9 @@ from collections import Counter
 import click
 import os
 import pandas as pd
+from mylog import get_logger
 
-logger = logging.getLogger(os.path.basename(__file__) + " - " +  __name__)
-logger.setLevel(logging.DEBUG)
-
-handler = logging.FileHandler('/home/ekornobis/logs/common.log')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-# add the handlers to the logger
-logger.addHandler(handler)
-
+logger = get_logger(__file__, __name__)
 
 # TODO: check if dedup_fasta can be improved using yield as in
 # /home/ekornobis/code/allemand/gphn/7.2_generate_ref_before_rsem.py

@@ -1,22 +1,20 @@
 import sys
 import os
 import pysam
-import logging
 import numpy as np
 import subprocess
 from collections import Counter
 from itertools import chain
 import matplotlib.pyplot as plt
+from mylog import get_logger
+
+logger = get_logger(__file__, __name__)
 
 # ROOM FOR IMPROVEMENT...
 # Sort isoform by abundance and named them iso_1 ... iso_n according
 # to abundance
 # Display name of the iso in the bam/fas file
 # Force the usage of a set of exons by specifying a bed file in cmd line
-
-
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
 
 
 def dedup_fasta(fasta, fasta_out=None):
@@ -39,8 +37,8 @@ def dedup_fasta(fasta, fasta_out=None):
             dedup_dict[seq.sequence] = [seq.name]
 
     reads_per_seq = Counter(map(lambda x: len(x), dedup_dict.values()))
-    log.info('Number of copies per reads:')
-    log.info(reads_per_seq)
+    logger.info('Number of copies per reads:')
+    logger.info(reads_per_seq)
 
     # Plot log(x) + 1 to see count =1 and large values
     plt.bar(reads_per_seq.keys(), np.log(reads_per_seq.values()) + 1)
@@ -80,8 +78,8 @@ def get_overall_exon_counts(bam):
     out = subprocess.check_output(cmd, shell=True)
     out = out.strip().split('\n')
     out = [x.split('\t') for x in out]
-    log.info("Number of exons: {}".format(len(out)))
-    log.info("Exon coverage distribution: {}".format(out))
+    logger.info("Number of exons: {}".format(len(out)))
+    logger.info("Exon coverage distribution: {}".format(out))
 
     # xs = map(int, chain.from_iterable([i[1:3] for i in out]))
     # ys = map(int, chain.from_iterable([[i[3], i[3]] for i in out]))
@@ -109,7 +107,7 @@ def get_exon_count_per_read(bam):
 
         fcount += 1
 
-        log.debug("Indexing {}".format(bam))
+        logger.debug("Indexing {}".format(bam))
         pysam.index(bam_path)
 
         cmd = 'bedtools multicov -split -bams {0} -bed {1}'.format(bam_path, config_potential_exon)
@@ -125,7 +123,7 @@ def get_exon_count_per_read(bam):
             f.write(rd.query_name + '\t')
             f.write('\t'.join(list(count_dict[rd.query_name])) + '\n')
 
-    log.info('Total sequences put in single indexed bams: {}'.format(fcount))
+    logger.info('Total sequences put in single indexed bams: {}'.format(fcount))
     return count_dict
 
 
@@ -141,7 +139,7 @@ def cluster_by_exon_composition(bam, count_dict):
     for ex in exon_compo:
 
         seq_in_clust = [k for k in count_dict if count_dict[k] == ex]
-        log.info('For cluster {0}: {1} sequence(s)'.format(ex, len(seq_in_clust)))
+        logger.info('For cluster {0}: {1} sequence(s)'.format(ex, len(seq_in_clust)))
 
         bam_path = os.path.join(config_bam_clusters, 'cluster' + ex + '.bam')
         fas_path = os.path.join(config_fas_clusters, 'cluster' + ex + '.fas')        
@@ -161,7 +159,7 @@ def cluster_by_exon_composition(bam, count_dict):
 
 
 def prepare_outfolder():
-    log.info('Creating output folders in {}'.format(config_outfolder))
+    logger.info('Creating output folders in {}'.format(config_outfolder))
     os.makedirs(config_outfolder)
     os.makedirs(config_bam_clusters)
     os.makedirs(config_fas_clusters)

@@ -1,10 +1,9 @@
 import argparse
-import logging
 import re
 from pyensembl import EnsemblRelease
+from mylog import get_logger
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+logger = get_logger(__file__, __name__)
 
 ### THIS IS ONLY FOR HUMAN release 75 !!!
 data = EnsemblRelease(release=75, species="homo_sapiens")
@@ -15,7 +14,7 @@ def parse_id_name_list(mixed_list):
     From a mixed list of ensembl IDs and associated gene names,
     retrieve information from the corresponding gene
     """
-    log.info('Total number of genes in the list: {}'.format(len(mixed_list)))
+    logger.info('Total number of genes in the list: {}'.format(len(mixed_list)))
 
     bad_names_count = []
     multiple_ids_per_name = []
@@ -47,9 +46,9 @@ def parse_id_name_list(mixed_list):
 
         yield g_entry
 
-    log.warn('Number of genes failing entry lookup (probably alias gene problem): {0} {1} [DISCARDED]'.format(len(bad_names_count),
+    logger.warn('Number of genes failing entry lookup (probably alias gene problem): {0} {1} [DISCARDED]'.format(len(bad_names_count),
                                                                                                               bad_names_count))
-    log.warn('Number of gene names associated with more than 1 ensembl ID: {0} {1} [DISCARDED]'.format(len(multiple_ids_per_name),
+    logger.warn('Number of gene names associated with more than 1 ensembl ID: {0} {1} [DISCARDED]'.format(len(multiple_ids_per_name),
                                                                                                        multiple_ids_per_name))
 
 
@@ -72,7 +71,7 @@ def main():
                         Ensembl IDs or associated gene names')
     args = parser.parse_args()
 
-    log.warning('This script is using h.sapiens release 75')
+    logger.warning('This script is using h.sapiens release 75')
     
     gene_entries = parse_id_name_list(
         [x.strip() for x in open(args.gene_names)])

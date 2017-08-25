@@ -2,11 +2,9 @@ import urllib
 import argparse
 from bs4 import BeautifulSoup
 import json
-import logging
+from mylog import get_logger
 
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
-
+logger = get_logger(__file__, __name__)
 
 ################################################################################
 # NOT NECESSARY ANYMORE, FOR LEGACY
@@ -32,12 +30,12 @@ def get_geo_id(gse):
                                      'email': 'ekornobis@gmail.com',
                                      'tool': 'pythonScript'})
     url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{}'.format(params)
-    log.info('URL Query: {}'.format(url))
+    logger.info('URL Query: {}'.format(url))
     
     with urllib.request.urlopen(url) as response:
         res = json.loads(response.read().decode('utf-8'))
         
-        log.debug(json.dumps(res, indent=4, sort_keys=True))
+        logger.debug(json.dumps(res, indent=4, sort_keys=True))
         webenv = res['esearchresult']['webenv']
         query_key = res['esearchresult']['querykey']
         
@@ -64,7 +62,7 @@ def link_to_sras_ids(webenv, query_key):
         # for entry in res['result']:
         #     print(res['result'][entry]['runs'])
         res = res['result']
-        log.debug(json.dumps(res, indent=4, sort_keys=True))
+        logger.debug(json.dumps(res, indent=4, sort_keys=True))
 
 
     # params = urllib.parse.urlencode({'db': 'sra',
