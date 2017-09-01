@@ -20,9 +20,14 @@ logger = get_logger(__file__, __name__)
 # Limitations
 # Check the CMD_OPTIONS dictionnary for adding other programs
 
+##### WARNING #####
 # ASSUMPTIONS:
 # Paired file names are named as SAMPLE_1.* SAMPLE_2.*
+###################
 
+# POSSIBLE IMPROVEMENTS:
+# Ask for the folder on tars where to copy all necessary files (and
+# launch the job directly ?)
 
 CMD_OPTIONS = {
     'qorts': {'single': '--singleEnded',
@@ -66,7 +71,7 @@ class Job():
             self.params['star'] = '--readFilesCommand zcat'
             
     def __repr__(self):
-        return "Job object: {0}".format(self.params)
+        return "Snakemake Job object: {0}".format(self.params)
 
     
     def generate_config(self, json_out):
@@ -106,9 +111,9 @@ class Job():
 @click.option('--fqdir', '-f', default=None, type=click.Path(exists=True, resolve_path=True), required=True,
               help='Path to the fastqs directory.')
 @click.option('--strand', '-s', type=click.Choice(['unstranded', 'stranded', 'reverse']), required=True,
-              help='Strandedness: 0:not stranded; 1:stranded; 2: reverse stranded.')
+              help='Strandedness: "unstranded", "stranded" or  "reverse stranded".')
 @click.option('--pair', '-p', default=False, type=click.Choice(['single', 'paired']), required=True,
-              help='Paired end: either True or False.')
+              help='Paired end: either "single" or "paired".')
 @click.option('--json_out', '-o', default='snakemake.json', type=str,
               help='Path to the json output.')
 @click.option('--gtf', '-g', default=None, type=click.Path(exists=True, resolve_path=True), required=True,
