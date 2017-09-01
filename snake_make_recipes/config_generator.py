@@ -118,7 +118,8 @@ class Job():
 @click.option('--ref_fasta','-r', default=None, type=click.Path(exists=True, resolve_path=True),
               help='Path to the reference genome fasta.')
 def main(**kwargs):
-    """A simple parser to get NGS library information
+    """A configuration tool to automatically generate input files for
+    snakemake workflows
     """
 
     job = Job(**kwargs)
