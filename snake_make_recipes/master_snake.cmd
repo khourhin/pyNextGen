@@ -13,7 +13,7 @@ module load subread/1.4.6-p3
 module load MultiQC/0.7
 
 # The snakemake file with pipeline rules
-SM=pre_bam.sm
+SM=~/Programming/pyNextGen/snake_make_recipes/pre_bam.sm 
 
 # Cluster specification for each job
 CLUS_CONF=cluster.conf
