@@ -49,7 +49,7 @@ def main(genes, query, **kwargs):
         search_genes(genes, **kwargs)
     else:
         logger.info("Annotating entrez or ensembl ids in {} with mygene.info".format(genes.name))
-        annotate_genes(genes, **kwargs)
+        annotate_genes(genes)
         
 if __name__ == '__main__':
     main()
