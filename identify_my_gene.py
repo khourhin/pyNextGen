@@ -16,7 +16,7 @@ logger = get_logger(__file__, __name__)
 # more with mg.querymany. But easily modified.
 
 
-def annotate_genes(genes):
+def annotate_genes(genes, kwargs):
     """Use entrez or ensembl ids list and print annotations for each
     """
 
@@ -27,7 +27,7 @@ def annotate_genes(genes):
     res.to_csv(kwargs['outfile'])
 
 
-def search_genes(genes, **kwargs):
+def search_genes(genes, kwargs):
     """Query genes based on common gene name (eg 'CD44')"""
 
     mg = mygene.MyGeneInfo()
@@ -46,10 +46,10 @@ def main(genes, query, **kwargs):
 
     if query:
         logger.info("Querying common gene names in {} to mygene.info".format(genes.name))
-        search_genes(genes, **kwargs)
+        search_genes(genes, kwargs)
     else:
         logger.info("Annotating entrez or ensembl ids in {} with mygene.info".format(genes.name))
-        annotate_genes(genes)
+        annotate_genes(genes, kwargs)
         
 if __name__ == '__main__':
     main()
