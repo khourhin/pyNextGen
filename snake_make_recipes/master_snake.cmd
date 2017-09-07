@@ -16,7 +16,7 @@ module load MultiQC/0.7
 SM=~/Programming/pyNextGen/snake_make_recipes/pre_bam.sm 
 
 # Cluster specification for each job
-CLUS_CONF==~/Programming/pyNextGen/snake_make_recipes/cluster.conf
+CLUS_CONF=~/Programming/pyNextGen/snake_make_recipes/cluster.conf
 
 # This configuration file can be create with config_generator.py
 SM_JSON=snakemake.json
