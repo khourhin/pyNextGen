@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # table input example
 # | CR_Inp_1.bam     | CR_Inp     |
 # | CR_Inp_2.bam     | CR_Inp     |
