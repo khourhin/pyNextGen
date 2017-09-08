@@ -1,3 +1,6 @@
+
+#! /usr/bin/env python3
+
 import basics_fastq as bfq
 import sys
 import clusters_from_blast as cfb
