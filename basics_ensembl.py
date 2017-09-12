@@ -27,7 +27,13 @@ def parse_id_name_list(mixed_list):
 
         # Check if the name is an Ensembl gene ID (ENSG)
         if a.match(gene_id):
-            g_entry = ensembl_release.gene_by_id(gene_id)
+
+            try:
+                g_entry = ensembl_release.gene_by_id(gene_id)
+                
+            except ValueError:
+                bad_names_count.append(gene_id)
+                continue
 
         # Else if the name is an associated gene name
         else:
@@ -40,13 +46,12 @@ def parse_id_name_list(mixed_list):
                     g_entry = g_entry[0]
                 else:
                     multiple_ids_per_name.append(gene_id)
-                    g_entry = None
 
             except ValueError:
-                g_entry = None
                 bad_names_count.append(gene_id)
+                continue
 
-        yield g_entry
+        yield (g_entry)
 
     logger.warn('Number of genes failing entry lookup (probably alias gene problem): {0} {1} [DISCARDED]'.format(len(bad_names_count),
                                                                                                               bad_names_count))
@@ -59,10 +64,10 @@ def print_gene_list(gene_entries):
     Print the results obtained by parse_ID_name_list
     """
 
-    for gene in gene_entries:
-        if gene:
-            print(gene.contig, gene.start, gene.end,
-                  gene.strand, gene.gene_id, gene.name, sep='\t')
+    for g in gene_entries:
+        if g:
+            print(g.contig, g.start, g.end,
+                  g.strand, g.gene_id, g.name, sep='\t')
 
 
 def main():
