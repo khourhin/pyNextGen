@@ -64,7 +64,7 @@ def main(sras, gene_file, flank, threads):
     file. GENE_LIST file is a txt file with a list of Ensembl or Gene
     Symbol IDs (one per line).
     """
-    logger.info("Fetching data for {0} SRAs librairies:{1}. Using {2} thread(s).".format(len(sras), sras, threads))
+    logger.info("Fetching data for {0} SRAs librairies:{1}. Using {2} thread(s). Flanking region: {3}b.".format(len(sras), sras, threads, flank))
     get_all_bams(sras, gene_file, flank, threads)
 
 if __name__ == "__main__":
