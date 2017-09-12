@@ -8,7 +8,7 @@ from mylog import get_logger
 logger = get_logger(__file__, __name__)
 
 ### THIS IS ONLY FOR HUMAN release 75 !!!
-data = EnsemblRelease(release=75, species="homo_sapiens")
+ensembl_release = EnsemblRelease(release=75, species="homo_sapiens")
 
 
 def parse_id_name_list(mixed_list):
@@ -27,13 +27,13 @@ def parse_id_name_list(mixed_list):
 
         # Check if the name is an Ensembl gene ID (ENSG)
         if a.match(gene_id):
-            g_entry = data.gene_by_id(gene_id)
+            g_entry = ensembl_release.gene_by_id(gene_id)
 
         # Else if the name is an associated gene name
         else:
 
             try:
-                g_entry = data.genes_by_name(gene_id)
+                g_entry = ensembl_release.genes_by_name(gene_id)
 
                 # Check if unique match associated gene name / ensembl ID
                 if len(g_entry) == 1:

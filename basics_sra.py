@@ -42,9 +42,7 @@ def get_bam_for_gene(sra, gene, flank):
     """*TO IMPROVE* so far this function is taking as input a extracted
     gtf This should use an import instead of
     basics_ensembl.print_gene_list (which gives start and end of each
-    genes), but I'm concerned about the import of the global variable
-    'data' (pretty bad name by the way) which is in
-    basics_ensembl. Refactoring is NEEDED.
+    genes). Refactoring is NEEDED.
 
     """
     logger.info(gene)
