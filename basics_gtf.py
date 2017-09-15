@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import argparse
 import os
 from collections import Counter
@@ -130,6 +132,7 @@ def main():
     # Create db if not in current folder
     dbfn = args.gtf + '.db'
     if not os.path.isfile(dbfn):
+        logger.info('Creating database for {}'.format(dbfn))
         create_db(args.gtf, dbfn)
     else:
         logger.info("Using already available database: {}".format(dbfn))
