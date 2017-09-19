@@ -11,7 +11,7 @@ def get_logger(f, n):
 
     handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
     formatter = ColoredFormatter(
-        "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s'",
+        "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt=None,
         reset=True,
         log_colors={
