@@ -15,6 +15,10 @@ import os
 import argparse
 import subprocess
 import itertools
+from mylog import get_logger
+
+logger = get_logger(__file__, __name__)
+
 
 def parse_input(input_tab):
     """Parse input for majiq. Input should have:
@@ -56,21 +60,21 @@ genome_path={3}
                                                       for x in inp
                                                       if inp[x][1] == grp])))
 
-def main(args, inp, groups, debug=False):
+def main(args, inp, groups, control, debug=False):
 
     if not debug:
         os.makedirs(args.outdir)
         os.chdir(args.outdir)
 
-    print(inp)
-    print(groups)
-    print(args.stranded)
+    logger.debug("Summary Bams/groups: {}".format(inp))
+    logger.debug("Groups used: {}".format(groups))
+    logger.debug("Strandness switch used: {}".format(args.stranded == "type=strand-specific"))
     
     if not debug:
         create_conf(args.majiq_conf, inp)
     
     cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(args.gff, args.majiq_conf, args.threads)
-    print(cmd)
+    logger.debug(cmd)
 
     if not debug:
         subprocess.check_output(cmd, shell=True)
@@ -81,13 +85,13 @@ def main(args, inp, groups, debug=False):
         dot_majiq = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == grp])
         
         cmd =  'majiq psi {0} --nthreads {1} --output psi_{2} --name {2}'.format(dot_majiq, args.threads, grp)
-        print(cmd)
+        logger.info(cmd)
         
         if not debug:
             subprocess.check_output(cmd, shell=True)
 
         cmd = 'voila psi psi_{0}/{0}.deltapsi.voila -splice-graph splicegraph.hdf5 -o voila_{0}'.format(grp)
-        print(cmd)
+        logger.info(cmd)
 
         if not debug:
             # Apparently this step might not be necessary
@@ -95,20 +99,23 @@ def main(args, inp, groups, debug=False):
             pass
 
 
-    for i,j in itertools.combinations(groups, 2):
-        print(i,j)
+    groups.remove(control)
+    for i in groups:
+        j = control
+        logger.debug('Comparing "{0}" VS "{1}" (Control will be "{1}" then ;)'.format(i, j))
+        
         dot_majiq_i = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == i])
         dot_majiq_j = ' '.join([x + '.majiq.hdf5' for x in inp if inp[x][1] == j])
 
-        cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=args.threads)
-        print(cmd)
+        cmd = 'majiq deltapsi -grp1 {majiq_i} -grp2 {majiq_j} --names {i} {j} --nthreads {t} --output dpsi_{i}_VS_{j}'.format(majiq_i=dot_majiq_i, majiq_j=dot_majiq_j, i=i, j=j, t=args.threads)
+        logger.info(cmd)
 
         if not debug:
             subprocess.check_output(cmd, shell=True)
             
-        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi.voila --splice-graph splicegraph.hdf5 -o voila_{i}_{j}'.format(i=i, j=j)
+        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi.voila --splice-graph splicegraph.hdf5 -o voila_{i}_VS_{j}'.format(i=i, j=j)
 
-        print(cmd)
+        logger.info(cmd)
         if not debug:
             subprocess.check_output(cmd, shell=True)
 
@@ -125,9 +132,14 @@ if __name__ == '__main__':
                         help='Specify if reads are stranded. Default is unstranded.')
     parser.add_argument('--threads', '-t', help='Number of threads to use', default=5, type=int)    
     parser.add_argument('--outdir', '-o', help='Path to output directory (NO SLASH AT THE END FOR NOW!)', default='majiq_out', type=str)    
-    parser.add_argument('--majiq_conf', '-c', help='Path to the create majiq.conf file (not important at all...)', default='majiq.conf', type=str)    
+    parser.add_argument('--majiq_conf', '-c', help='Path to the create majiq.conf file (not important at all...)', default='majiq.conf', type=str)
+    parser.add_argument('--control', help='Name of the group which will be used as control', required=True)
     parser.add_argument('--debug', '-d', help='', action='store_true')
     args = parser.parse_args()
 
     inp, groups = (parse_input(args.meta))
-    main(args, inp, groups, args.debug)
+
+    if args.control not in groups:
+        raise IOError('The control group chosen "{0}" is not present in the groups specified: {1}'.format(args.control, groups))
+    
+    main(args, inp, groups, args.control, args.debug)
