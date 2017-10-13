@@ -74,7 +74,7 @@ def main(args, inp, groups, control, debug=False):
         create_conf(args.majiq_conf, inp)
     
     cmd = "majiq build {0} -conf {1} --nthreads {2} --output .".format(args.gff, args.majiq_conf, args.threads)
-    logger.debug(cmd)
+    logger.info(cmd)
 
     if not debug:
         subprocess.check_output(cmd, shell=True)
