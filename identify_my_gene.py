@@ -16,6 +16,15 @@ logger = get_logger(__file__, __name__)
 # more with mg.querymany. But easily modified.
 
 
+def post_output(res, kwargs):
+    """Return the output to file or to stdout depending on the CLI options
+    """
+    if kwargs['outfile']:
+        res.to_csv(kwargs['outfile'])
+    else:
+        res.to_csv(sys.stdout)
+
+        
 def annotate_genes(genes, kwargs):
     """Use entrez or ensembl ids list and print annotations for each
     """
@@ -24,24 +33,23 @@ def annotate_genes(genes, kwargs):
     res = mg.getgenes(
         genes, fields='symbol,name,taxid,genomic_pos_hg19', as_dataframe=True)
 
-    res.to_csv(kwargs['outfile'])
+    post_output(res, kwargs)
 
 
 def search_genes(genes, kwargs):
     """Query genes based on common gene name (eg 'CD44')"""
-
+    
     mg = mygene.MyGeneInfo()
     res = mg.querymany(
         genes, scopes='symbol', fields='ensembl.gene,symbol,name,taxid,genomic_pos_hg19', as_dataframe=True, species=kwargs['species'])
-
-    res.to_csv(kwargs['outfile'])
+    post_output(res, kwargs)
 
 
 @click.command()
 @click.argument('genes', type=click.File('r'))
 @click.option('--query', '-q', is_flag=True, help='For querying by common genes names (eg CD44)')
 @click.option('--species', '-s', help='Specify the species to use (eg "human", "10090")')
-@click.option('--outfile', '-o', default='idg_res.csv', type=click.File('w'), help='Output file')
+@click.option('--outfile', '-o', type=click.File('w'), help='Output file')
 def main(genes, query, **kwargs):
 
     if query:
