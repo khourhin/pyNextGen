@@ -50,6 +50,12 @@ CMD_OPTIONS = {
                      'stranded': '-s 1',
                      'reverse': '-s 2',
     },
+    'kallisto': {'single': '--single',
+                 'paired': '',
+                 'unstranded': '',
+                 'stranded': '--fr-stranded',
+                 'reverse': '--rf-stranded',
+    },
 }
 
 
@@ -124,6 +130,8 @@ class Job():
               help='Path to the star index directory.')
 @click.option('--ref_fasta','-r', default=None, type=click.Path(exists=True, resolve_path=True),
               help='Path to the reference genome fasta.')
+@click.option('--kallisto_index','-k', default=None, type=click.Path(exists=True, resolve_path=True),
+              help='Path to the kallisto transcriptome index.')
 def main(**kwargs):
     """A configuration tool to automatically generate input files for
     snakemake workflows

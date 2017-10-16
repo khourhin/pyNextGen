@@ -1,0 +1,35 @@
+import glob
+import os
+
+SAMPLES = config['samples']
+
+print(SAMPLES)
+
+
+rule targets:
+    input:
+        expand('kallisto_quant/{sample}', sample=SAMPLES)
+
+################################################################################
+# Kallisto quant recipe
+################################################################################
+
+rule kallisto:
+    input:
+        index = config['kallisto_index'],
+        fqs = [os.path.join(config['fqdir'], '{sample}' + config['fq_ext'])] if config['pair']=='single' else [(os.path.join(config['fqdir'], '{sample}' + num + config['fq_ext']) for num in ('_1', '_2'))]
+
+    output:
+        quant_dir = 'kallisto_quant/{sample}'
+
+    threads: 10
+
+    params:
+        extra = config['kallisto']
+
+    log:
+        err = 'logs/kallisto/{sample}_log.err',
+        out = 'logs/kallisto/{sample}_log.out'
+        
+    shell:
+        'kallisto quant {params.extra} -i {input.index} -t {threads} -o {output.quant_dir} {input.fqs} 1> {log.out} 2> {log.err}'
