@@ -23,12 +23,13 @@ print(SAMPLE)
 
 rule targets:
     input:
-        'featureCount/counts',
-        expand('qorts/{sample}', sample=SAMPLE),
-        expand('qualimap/{sample}', sample=SAMPLE),
-        'multiqc_report.html',
+        #'featureCount/counts',
+        #expand('qorts/{sample}', sample=SAMPLE),
+        #expand('qualimap/{sample}', sample=SAMPLE),
+        #'multiqc_report.html',
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
- 
+        expand('bw/{sample}.bw', sample=SAMPLE),
+        expand(os.path.join(config['bamdir'], '{sample}.bam.bai'), sample=SAMPLE),
         
 rule qorts:
     input:
@@ -90,6 +91,36 @@ rule multiqc:
         'multiqc_report.html'
     shell:
         'multiqc .'
+
+        
+rule indexing:
+    input:
+        bam = os.path.join(config['bamdir'], '{sample}.bam'),
+
+    output:
+        os.path.join(config['bamdir'], '{sample}.bam.bai'),
+
+    shell:
+        'samtools index {input.bam}'
+
+        
+rule bamCoverage:
+    input:
+        bam = os.path.join(config['bamdir'], '{sample}.bam'),
+        index = os.path.join(config['bamdir'], '{sample}.bam.bai'),
+
+    output:
+        'bw/{sample}.bw'
+        
+    log:
+        err = 'logs/bamCoverage_log.err',
+        out = 'logs/bamCoverage_log.out'
+        
+    threads: 10
+
+    shell:
+        'bamCoverage -p {threads} -b {input.bam} -o {output} 1>> {log.out} 2>> {log.err}'
+
         
 # rule rseqc_read_distribution:
 #     input:
