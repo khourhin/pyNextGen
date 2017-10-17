@@ -29,25 +29,27 @@ def get_genome_coverage(bedObj, genome_size):
     return cov
 
 
-def bed_stats(bedObj, genome_size):
+def bed_stats(bedObj, genome_size=None):
     """
     Produce various stats on a bed file
     """
 
     lengths = [len(i) for i in bedObj]
-    pd.DataFrame({"lengths":lengths}).plot()
-    plt.show()
-     
+
     stats = {
         'length': len(bedObj),
         'smallest': min(lengths),
         'largest': max(lengths),
         'mean': np.mean(lengths),
-        'genome_coverage': get_genome_coverage(bedObj, genome_size)
     }
+
+    if genome_size:
+        stats['genome_coverage'] =  get_genome_coverage(bedObj, genome_size)
 
     
     [logger.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+
+    return stats
 
     
 def count_intersections(bed_tuple):
