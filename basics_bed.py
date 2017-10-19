@@ -33,11 +33,12 @@ def bed_stats(bedObj, genome_size=None):
     """
     Produce various stats on a bed file
     """
-
+    
     lengths = [len(i) for i in bedObj]
 
     stats = {
-        'length': len(bedObj),
+        'name' : bedObj.fn,
+        'N_intervals': len(bedObj),
         'smallest': min(lengths),
         'largest': max(lengths),
         'mean': np.mean(lengths),
