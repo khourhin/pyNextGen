@@ -25,14 +25,15 @@ def post_output(res, kwargs):
         res.to_csv(sys.stdout)
 
         
-def annotate_genes(genes, kwargs):
-    """Use entrez or ensembl ids list and print annotations for each
+def annotate_genes(genes, kwargs=None):
+    """Use entrez or ensembl ids list and print annotations for each ids
     """
 
     mg = mygene.MyGeneInfo()
     res = mg.getgenes(
         genes, fields='symbol,name,taxid,genomic_pos_hg19', as_dataframe=True)
 
+    return res
     post_output(res, kwargs)
 
 

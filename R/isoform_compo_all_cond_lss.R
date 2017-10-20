@@ -3,7 +3,8 @@ library(ggplot2)
 library(gridExtra)
 library(reshape2)
 
-df = read.table('/home/ekornobis/analysis/allemand/gphn/2017_01_18/total_clusters_nom/table_isoName_exonCode_freq_sorted.tab',header=TRUE)
+                                        #df = read.table('/home/ekornobis/analysis/allemand/gphn/2017_01_18/total_clusters_nom/table_isoName_exonCode_freq_sorted.tab',header=TRUE)
+df = read.table('/home/ekornobis/analysis/allemand/gphn/2017_01_18/table_isoName_exonCode_freq_sorted.tab',header=TRUE)
 
 s = df[,1:41]
 s = melt(s, id='Name')
