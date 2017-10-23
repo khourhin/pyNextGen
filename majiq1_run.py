@@ -113,7 +113,7 @@ def main(args, inp, groups, control, debug=False):
         if not debug:
             subprocess.check_output(cmd, shell=True)
             
-        cmd = 'voila deltapsi dpsi_{i}_{j}/{i}_{j}.deltapsi.voila --splice-graph splicegraph.hdf5 -o voila_{i}_VS_{j}'.format(i=i, j=j)
+        cmd = 'voila deltapsi dpsi_{i}_VS_{j}/{i}_{j}.deltapsi.voila --splice-graph splicegraph.hdf5 -o voila_{i}_VS_{j}'.format(i=i, j=j)
 
         logger.info(cmd)
         if not debug:
