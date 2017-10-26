@@ -17,6 +17,13 @@ from mylog import get_logger
 logger = get_logger(__file__, __name__)
 
 
+def get_bed_size(bed):
+    """Much faster than using len(bed)
+    NOT IMPLEMENTED YET IN OTHER FUNCTIONS OF THIS MODULE"""
+    
+    return sum(1 for _ in open(bed.fn))
+
+
 def get_genome_coverage(bedObj, genome_size):
     """
     Get an estimation of the proportion of the genome covered by all
