@@ -3,15 +3,14 @@ import os
 
 from colorlog import ColoredFormatter
 
-
-def get_logger(f, n):
+def get_logger(f, n, log_level = logging.DEBUG):
 
     logger = logging.getLogger(os.path.basename(f) + " - " + n)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_level)
 
     handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
     formatter = ColoredFormatter(
-        "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "%(log_color)s%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s",
         datefmt=None,
         reset=True,
         log_colors={
