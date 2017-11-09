@@ -1,4 +1,7 @@
+#! /usr/bin/env python
+
 import logging
+import logging.handlers
 import os
 
 from colorlog import ColoredFormatter
@@ -8,7 +11,7 @@ def get_logger(f, n, log_level = logging.DEBUG):
     logger = logging.getLogger(os.path.basename(f) + " - " + n)
     logger.setLevel(log_level)
 
-    handler = logging.FileHandler(os.path.expanduser('~/logs/common.log'))
+    handler = logging.handlers.RotatingFileHandler(os.path.expanduser('~/logs/common.log'), maxBytes=1000000, backupCount=10)
     formatter = ColoredFormatter(
         "%(log_color)s%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s",
         datefmt=None,
