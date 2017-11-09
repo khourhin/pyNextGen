@@ -36,8 +36,8 @@ def dedup_fasta(fasta, fasta_out=None, graph=True):
             dedup_dict[seq.sequence] = [seq.name]
 
     reads_per_seq = Counter(map(lambda x: len(x), dedup_dict.values()))
-    logger.info('Number of copies per reads:')
     logger.info(reads_per_seq)
+    logger.info('Number of copies per reads:')
 
     if graph:
         labels, values = zip(*reads_per_seq.items())
