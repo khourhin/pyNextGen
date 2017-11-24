@@ -49,13 +49,14 @@ def bed_stats(bedObj, genome_size=None):
         'smallest': min(lengths),
         'largest': max(lengths),
         'mean': np.mean(lengths),
-    }
+        'all_lengths' : lengths
+    }    
 
     if genome_size:
         stats['genome_coverage'] =  get_genome_coverage(bedObj, genome_size)
 
     
-    [logger.info('{0}:{1}'.format(k, v)) for k, v in stats.items()]
+    [logger.debug('{0}:{1}'.format(k, v)) for k, v in stats.items()]
 
     return stats
 

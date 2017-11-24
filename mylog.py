@@ -6,7 +6,7 @@ import os
 
 from colorlog import ColoredFormatter
 
-def get_logger(f, n, log_level = logging.DEBUG):
+def get_logger(f, n, log_level = logging.INFO):
 
     logger = logging.getLogger(os.path.basename(f) + " - " + n)
     logger.setLevel(log_level)
