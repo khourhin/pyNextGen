@@ -8,6 +8,8 @@ from colorlog import ColoredFormatter
 
 def get_logger(f, n, log_level = logging.INFO):
 
+    # In case logging is made from a jupyter notebook, f helps
+    # pointing to the notebook importing the library
     logger = logging.getLogger(os.path.basename(f) + " - " + n)
     logger.setLevel(log_level)
 
