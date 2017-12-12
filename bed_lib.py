@@ -26,6 +26,14 @@ class Bed(object):
     def __repr__(self):
         return '<Bed object: {}>'.format(self.name)
 
+    def head(self, nlines=10):
+        with open(self.path, 'r') as f:
+            for i in range(nlines):
+                print(f.readline().strip())
+
+    def to_dataframe(self):
+        return pd.DataFrame.from_csv(self.path, sep='\t', header=None)
+    
     def total_bases(self):
         nbases = 0
         with open(self.path) as bed:
@@ -121,6 +129,19 @@ class Bed(object):
 
         return shuffle_beds
 
+    def coverage(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
+        """Bedtools coverage
+        """
+        coverage_path =  os.path.join(outfolder,
+                                      self.name + '-coveredby-' + bed_obj.name)
+        cmd = 'bedtools coverage -a {0} -b {1} > {2}'.format(self.path,
+                                                             bed_obj.path,
+                                                             coverage_path)
+
+        subprocess.call(cmd, shell=True)
+
+        return Bed(coverage_path)
+        
     
 def merge_bed_list(bed_tuple, outfolder='bed_outfolder'):
     """Concatenate, sort and merge a list of bed files, removing one bed
