@@ -41,8 +41,20 @@ def search_genes(genes, kwargs):
     """Query genes based on common gene name (eg 'CD44')"""
     
     mg = mygene.MyGeneInfo()
-    res = mg.querymany(
-        genes, scopes='symbol', fields='ensembl.gene,symbol,name,taxid,genomic_pos_hg19', as_dataframe=True, species=kwargs['species'])
+
+    if kwargs['allinfo']:
+        res = mg.querymany(
+            genes, scopes='symbol',
+            fields='all',
+            as_dataframe=True,
+            species=kwargs['species'])
+    else:
+        res = mg.querymany(
+            genes, scopes='symbol',
+            fields='ensembl,gene,symbol,name,taxid,genomic_pos_hg19',
+            as_dataframe=True,
+            species=kwargs['species'])
+        
     post_output(res, kwargs)
 
 
@@ -51,6 +63,7 @@ def search_genes(genes, kwargs):
 @click.option('--query', '-q', is_flag=True, help='For querying by common genes names (eg CD44)')
 @click.option('--species', '-s', help='Specify the species to use (eg "human", "10090")')
 @click.option('--outfile', '-o', type=click.File('w'), help='Output file')
+@click.option('--allinfo', '-a', is_flag=True, help="To retrieve all informations")
 def main(genes, query, **kwargs):
 
     if query:
