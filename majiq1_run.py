@@ -16,8 +16,9 @@ import argparse
 import subprocess
 import itertools
 from mylog import get_logger
+import logging
 
-logger = get_logger(__file__, __name__)
+logger = get_logger(__file__, __name__, log_level=logging.DEBUG)
 
 
 def parse_input(input_tab):

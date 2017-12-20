@@ -31,8 +31,8 @@ class Bed(object):
             for i in range(nlines):
                 print(f.readline().strip())
 
-    def to_dataframe(self):
-        return pd.DataFrame.from_csv(self.path, sep='\t', header=None)
+    def to_dataframe(self, index_col=0):
+        return pd.DataFrame.from_csv(self.path, sep='\t', header=None, index_col=index_col)
     
     def total_bases(self):
         nbases = 0
