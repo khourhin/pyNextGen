@@ -5,12 +5,35 @@ from itertools import combinations
 from multiprocessing.dummy import Pool
 import subprocess
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from functools import partial
 
 from mylog import get_logger
 
 logger = get_logger('', __name__, logging.DEBUG)
+
+
+# Assumptions:
+# For Interval class, bedfile should have 6 fields
+
+class Interval(object):
+    """A class for each intervals contained in a bed file
+    Bed file should have 6 fields
+    """
+
+    def __init__(self, line):
+        "Get interval from a bed file line"
+        line = line.split()
+        self.chro = line[0]
+        self.start = int(line[1])
+        self.end = int(line[2])
+        self.name = line[3]
+        self.score = line[4]
+        self.strand = line[5]
+
+    def __len__(self):
+        return self.end - self.start
 
 
 class Bed(object):
@@ -33,6 +56,19 @@ class Bed(object):
 
     def to_dataframe(self, index_col=0):
         return pd.DataFrame.from_csv(self.path, sep='\t', header=None, index_col=index_col)
+
+    def get_intervals(self):
+        with open(self.path) as bed:
+            for line in bed:
+                yield Interval(line)
+
+    def get_length_distribution(self):
+
+        len_distrib = []
+        for interval in self.get_intervals():
+            len_distrib.append(len(interval))
+
+        return len_distrib
     
     def total_bases(self):
         nbases = 0
@@ -54,6 +90,17 @@ class Bed(object):
                 'name': self.name,
                 'bedobj': self}
 
+    def plot(self):
+        """
+        Summarize stats with plots
+        """
+        
+        len_distrib = self.get_length_distribution()
+        pd.DataFrame(len_distrib).hist(bins=100)
+        plt.title('{}: Histogram of interval lengths'.format(self.name))
+        plt.xlabel('Interval length')
+        plt.ylabel('Frequencies')
+        
 
     def intersect(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """ Make default bedtools intersect of two beds"""
