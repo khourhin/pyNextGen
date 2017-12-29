@@ -89,8 +89,11 @@ def get_all_ali_stats(bam_list):
     return ribo_df
 
 
-def ribo_profiling_plot(pos_df, ref_fasta, bams, iso, orf_finder_csv=None):
-    """ Interactive plot of the coverage after Ishimura protocol"""
+def ribo_profiling_plot(pos_df, ref_fasta, bams, iso, orf_finder_csv=None, method='pos'):
+    """Interactive plot of the coverage after Ishimura protocol method:
+    can be either 'pos' ie number of reads at each position or
+    'read_percentage' ie percentage of reads over the transcript at the particular position
+    """
 
     tools = ['crosshair', 'wheel_zoom', 'box_zoom', 'reset']
     
@@ -99,14 +102,13 @@ def ribo_profiling_plot(pos_df, ref_fasta, bams, iso, orf_finder_csv=None):
     
     p1 = figure(plot_width=1550, plot_height=600, tools=tools)
     
-    count = 0
     for bam, color in zip(bams, palettes.Category10[10][:len(bams)]):
-        count += 1
         df = pos_df.loc[bam, iso].pos.value_counts()
         df = df.reindex(np.arange(iso_len)).fillna(0).reset_index()
+        df['read_percentage'] = df['pos'] / sum(df['pos']) * 100
         
         # Avoiding "source" because its messing up the legend !
-        p1.line(df['index'], df['pos'], color=color, muted_color=color,
+        p1.line(df['index'], df[method], color=color, muted_color=color,
                 muted_alpha=0.1, legend=bam)
     
     p1.legend.click_policy = "mute"
