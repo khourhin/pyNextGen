@@ -100,8 +100,51 @@ class Bed(object):
         plt.title('{}: Histogram of interval lengths'.format(self.name))
         plt.xlabel('Interval length')
         plt.ylabel('Frequencies')
+
+    def sort(self, outfolder='bed_outfolder', supp_args=''):
+        """ Sort bed file
+        """
+        os.makedirs(outfolder, exist_ok=True)
+        sort_path = os.path.join(outfolder, self.name + '_sort')
+
+        cmd = 'sort -k1,1 -k2,2n {0} > {1}'.format(self.path, sort_path)
+
+        subprocess.call(cmd, shell=True)
+        
+        return Bed(sort_path)
         
 
+    def merge(self, outfolder='bed_outfolder', supp_args=''):
+        """ Merge bed
+        """
+        os.makedirs(outfolder, exist_ok=True)
+        merged_path = os.path.join(outfolder, self.name + '_merged')
+
+        cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args, merged_path)
+
+        subprocess.call(cmd, shell=True)
+        
+        return Bed(merged_path)
+        
+
+    def closest(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
+        """ Make default bedtools closest
+        """
+
+        os.makedirs(outfolder, exist_ok=True)
+        closest_path = os.path.join(outfolder,
+                                    self.name + '-closest-' + bed_obj.name)
+        
+        cmd = 'bedtools closest -a {0} -b {1} {2} > {3}'.format(self.path,
+                                                                bed_obj.path,
+                                                                supp_args,
+                                                                closest_path)
+        print(cmd)
+        subprocess.call(cmd, shell=True)
+
+        return Bed(closest_path)
+
+    
     def intersect(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """ Make default bedtools intersect of two beds"""
 
@@ -112,7 +155,6 @@ class Bed(object):
                                                                   bed_obj.path,
                                                                   supp_args,
                                                                   inter_path)
-
         subprocess.call(cmd, shell=True)
 
         return Bed(inter_path)
