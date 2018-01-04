@@ -13,6 +13,8 @@ from mylog import get_logger
 
 logger = get_logger('', __name__, logging.DEBUG)
 
+# Improvements:
+# Add function 'Pandas dataframe to Bed object'
 
 # Assumptions:
 # For Interval class, bedfile should have 6 fields
@@ -28,9 +30,11 @@ class Interval(object):
         self.chro = line[0]
         self.start = int(line[1])
         self.end = int(line[2])
-        self.name = line[3]
-        self.score = line[4]
-        self.strand = line[5]
+
+        if len(line) > 3:
+            self.name = line[3]
+            self.score = line[4]
+            self.strand = line[5]
 
     def __len__(self):
         return self.end - self.start
@@ -110,7 +114,7 @@ class Bed(object):
 
         cmd = 'sort -k1,1 -k2,2n {0} > {1}'.format(self.path, sort_path)
 
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
         
         return Bed(sort_path)
 
@@ -123,7 +127,7 @@ class Bed(object):
         cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args,
                                                        merged_path)
 
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
         
         return Bed(merged_path)
         
@@ -139,7 +143,7 @@ class Bed(object):
                                                                 bed_obj.path,
                                                                 supp_args,
                                                                 closest_path)
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
 
         return Bed(closest_path)
 
@@ -153,7 +157,7 @@ class Bed(object):
                                                                                   bed_obj.path,
                                                                                   supp_args,
                                                                                   inter_path)
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
 
         return Bed(inter_path)
 
@@ -168,7 +172,7 @@ class Bed(object):
                                                                  supp_args,
                                                                  subtract_path)
 
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
 
         return Bed(subtract_path)
 
@@ -213,7 +217,7 @@ class Bed(object):
                                                                     shuffle_path)
 
             logger.debug('Running: {}'.format(cmd))
-            subprocess.call(cmd, shell=True)
+            subprocess.check_output(cmd, shell=True)
             shuffle_beds.append(Bed(shuffle_path))
 
         return shuffle_beds
@@ -227,9 +231,23 @@ class Bed(object):
                                                              bed_obj.path,
                                                              coverage_path)
 
-        subprocess.call(cmd, shell=True)
+        subprocess.check_output(cmd, shell=True)
 
         return Bed(coverage_path)
+
+    def cluster(self, outfolder='bed_outfolder', supp_args=''):
+        """ Cluster bed
+        """
+        
+        os.makedirs(outfolder, exist_ok=True)
+        cluster_path = os.path.join(outfolder, self.name + '_clustered')
+
+        cmd = 'bedtools cluster -i {0} {1} > {2}'.format(self.path, supp_args,
+                                                         cluster_path)
+
+        subprocess.check_output(cmd, shell=True)
+        
+        return Bed(cluster_path)
         
     
 def merge_bed_list(bed_tuple, outfolder='bed_outfolder'):
@@ -248,7 +266,7 @@ def merge_bed_list(bed_tuple, outfolder='bed_outfolder'):
     cmd = 'cat {0} | bedtools sort | bedtools merge > {1}'\
           .format(' '.join([bed.path for bed in bed_list]), merge_path)
     
-    subprocess.call(cmd, shell=True)
+    subprocess.check_output(cmd, shell=True)
     
     return Bed(merge_path)
 
@@ -281,7 +299,10 @@ def get_all_merged_beds(bed_list, nthreads=1, outfolder='bed_outfolder'):
 
 def jaccard_index(inter_stats_df, raw_beds_stats_df, count_column='Nbases'):
     """Function to get the jaccard index for each intersection, based on
-    the values specified in column specified in count_column"""
+    the values specified in column specified in count_column
+    
+    TO CHECK: THIS COULD BE REPLACED BY bedtools jaccard
+    """
 
     res = []
 
