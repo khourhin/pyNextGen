@@ -37,7 +37,7 @@ class Interval(object):
 
 
 class Bed(object):
-    """Bed object 
+    """Bed object
     """
     def __init__(self, path):
         self.path = path
@@ -55,7 +55,8 @@ class Bed(object):
                 print(f.readline().strip())
 
     def to_dataframe(self, index_col=0):
-        return pd.DataFrame.from_csv(self.path, sep='\t', header=None, index_col=index_col)
+        return pd.DataFrame.from_csv(self.path, sep='\t', header=None,
+                                     index_col=index_col)
 
     def get_intervals(self):
         with open(self.path) as bed:
@@ -112,7 +113,6 @@ class Bed(object):
         subprocess.call(cmd, shell=True)
         
         return Bed(sort_path)
-        
 
     def merge(self, outfolder='bed_outfolder', supp_args=''):
         """ Merge bed
@@ -120,13 +120,13 @@ class Bed(object):
         os.makedirs(outfolder, exist_ok=True)
         merged_path = os.path.join(outfolder, self.name + '_merged')
 
-        cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args, merged_path)
+        cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args,
+                                                       merged_path)
 
         subprocess.call(cmd, shell=True)
         
         return Bed(merged_path)
         
-
     def closest(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """ Make default bedtools closest
         """
@@ -139,12 +139,10 @@ class Bed(object):
                                                                 bed_obj.path,
                                                                 supp_args,
                                                                 closest_path)
-        print(cmd)
         subprocess.call(cmd, shell=True)
 
         return Bed(closest_path)
 
-    
     def intersect(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """ Make default bedtools intersect of two beds"""
 
@@ -152,9 +150,9 @@ class Bed(object):
         inter_path = os.path.join(outfolder,
                                   self.name + '-inter-' + bed_obj.name)
         cmd = 'bedtools intersect -a {0} -b {1} {2} | bedtools sort > {3}'.format(self.path,
-                                                                  bed_obj.path,
-                                                                  supp_args,
-                                                                  inter_path)
+                                                                                  bed_obj.path,
+                                                                                  supp_args,
+                                                                                  inter_path)
         subprocess.call(cmd, shell=True)
 
         return Bed(inter_path)
@@ -189,7 +187,7 @@ class Bed(object):
         header = output.split('\n')[-3].split('\t')
         values = output.split('\n')[-2].split('\t')
 
-        res = {k:float(v) for k,v in zip(header, values)}
+        res = {k: float(v) for k, v in zip(header, values)}
 
         res['bed1'] = self.name
         res['bed2'] = bed_obj.name
@@ -200,13 +198,15 @@ class Bed(object):
                 
         return res
 
-    def multi_shuffle(self, nshuffle, genome_chro_size, supp_args='', outfolder='bed_outfolder'):
+    def multi_shuffle(self, nshuffle, genome_chro_size,
+                      supp_args='', outfolder='bed_outfolder'):
         """ Bedtools shuffle multiple times
         """
         shuffle_beds = []
         
         for i in range(nshuffle):
-            shuffle_path = os.path.join(outfolder, self.name + '-shuffle-' + str(i))
+            shuffle_path = os.path.join(outfolder,
+                                        self.name + '-shuffle-' + str(i))
             cmd = 'bedtools shuffle -i {0} -g {1} {2} > {3}'.format(self.path,
                                                                     genome_chro_size,
                                                                     supp_args,
@@ -221,7 +221,7 @@ class Bed(object):
     def coverage(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """Bedtools coverage
         """
-        coverage_path =  os.path.join(outfolder,
+        coverage_path = os.path.join(outfolder,
                                       self.name + '-coveredby-' + bed_obj.name)
         cmd = 'bedtools coverage -a {0} -b {1} > {2}'.format(self.path,
                                                              bed_obj.path,
@@ -298,33 +298,3 @@ def jaccard_index(inter_stats_df, raw_beds_stats_df, count_column='Nbases'):
 
     return pd.DataFrame(res)
 
-
-################################################################################
-# FOR LEGACY, parallel execution is now done in the notebook
-################################################################################
-
-# def parallel_bedop(beds_list, method, nthreads=1):
-#     """ Apply with threads the method for a list of Bed object
-#     """
-    
-#     p = Pool(nthreads)
-#     res = []
-
-#     if method == 'intersect':
-
-#         #This is a trick to be able to use the object method in threads
-#         def threaded_intersect(bed1, bed2): return bed1.intersect(bed2)
-#         res = p.starmap(threaded_intersect, combinations(beds_list, 2))
-
-#     if method == 'subtract':
-#         for i, bed in enumerate(beds_list):
-#             # Copy the list
-#             l = beds_list[:]
-
-#             # Remove the bed considered to apply method against all other beds
-#             l.pop(i)
-#             res += p.map(getattr(bed, method), [vs_bed for vs_bed in l])
-
-#     return res
-
-################################################################################
