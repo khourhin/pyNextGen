@@ -1,4 +1,3 @@
-
 #! /usr/bin/env python3
 
 import basics_fastq as bfq
