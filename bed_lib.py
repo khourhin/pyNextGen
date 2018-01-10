@@ -58,6 +58,15 @@ class Bed(object):
             for i in range(nlines):
                 print(f.readline().strip())
 
+    def rename(self, newpath):
+        """Rename the bed files associated (staying in the same folder)
+        """
+        os.rename(self.path, newpath)
+        self.path = newpath
+        self.name = os.path.basename(self.path)
+
+        return self
+
     def to_dataframe(self, index_col=0):
         return pd.DataFrame.from_csv(self.path, sep='\t', header=None,
                                      index_col=index_col)
