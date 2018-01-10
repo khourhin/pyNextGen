@@ -28,7 +28,7 @@ def bam_to_fragments(bam):
     """From mapped reads in a bam, get bed intervals of the pairs joined
     into fragments
     """
-    bedpe = os.path.splitext(bam)[0] + "_bothMapped_primaryAlign_noSplice_frag.bed"
+    bedpe = os.path.splitext(bam)[0] + "_frag.bed"
     # Converting to fragments and bed format
     cmd = "bedtools bamtobed -bedpe -mate1 -i {0} > {1} 2> bedpe.log""".format(bam, bedpe)
     

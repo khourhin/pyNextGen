@@ -17,7 +17,15 @@ logger = get_logger('', __name__, logging.DEBUG)
 # Add function 'Pandas dataframe to Bed object'
 
 # Assumptions:
-# For Interval class, bedfile should have 6 fields
+# For Interval class, bedfile should have 3 or 6 fields
+
+def df_to_bed(df, path):
+    """ Create a bed object from a pandas dataframe
+    """
+    
+    df.to_csv(path, sep='\t', header=None, index=False)
+    return Bed(path)
+
 
 class Interval(object):
     """A class for each intervals contained in a bed file
@@ -31,7 +39,7 @@ class Interval(object):
         self.start = int(line[1])
         self.end = int(line[2])
 
-        if len(line) > 3:
+        if len(line) != 3:
             self.name = line[3]
             self.score = line[4]
             self.strand = line[5]
@@ -58,8 +66,8 @@ class Bed(object):
             for i in range(nlines):
                 print(f.readline().strip())
 
-    def rename(self, newpath):
-        """Rename the bed files associated (staying in the same folder)
+    def move_to(self, newpath):
+        """Move the bed file associated
         """
         os.rename(self.path, newpath)
         self.path = newpath
