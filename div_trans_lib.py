@@ -15,7 +15,7 @@ def bam_filtering(bam):
 
     filt_bam = os.path.splitext(bam)[0] + "_filtered.bam"
     
-    # Filtering bam
+    # Filtering bam, removing unmapped, mate unmapped, spliced, secondary mapping
     cmd = "samtools view -h -F 0x4 -F 0x8 -F 0x100 {0} | awk '{{if ($1 ~ /^@/) {{print}} else if ($6 !~ /N/) {{print}}}}' | samtools view -bh > {1}".format(bam, filt_bam)
 
     subprocess.check_output(cmd, shell=True)
@@ -64,7 +64,7 @@ def bedpe_to_fragbed(bedpe, max_insert_size=500):
                 frag_lengths.append(frag_l)
 
                 # This is setting the correct strand (strand of the second of pair)
-                if frag_l  >= max_insert_size:
+                if frag_l  <= max_insert_size:
                     f.write('{0}\t{1}\t{2}\t{3}\t.\t{4}\n'.format(l.split()[0], start, stop, l.split()[6], l.split()[9]))
                 else:
                     frag_filt_n += 1
