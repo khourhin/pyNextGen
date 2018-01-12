@@ -54,7 +54,7 @@ class Bed(object):
     """
     def __init__(self, path):
         self.path = path
-        self.name = os.path.basename(path)
+        self.name = os.path.splitext(os.path.basename(path))[0]
 
     def __len__(self):
         return sum(1 for _ in open(self.path))
@@ -128,7 +128,7 @@ class Bed(object):
         """ Sort bed file
         """
         os.makedirs(outfolder, exist_ok=True)
-        sort_path = os.path.join(outfolder, self.name + '_S')
+        sort_path = os.path.join(outfolder, self.name + '_S.bed')
 
         cmd = 'sort -k1,1 -k2,2n {0} > {1}'.format(self.path, sort_path)
 
@@ -140,7 +140,7 @@ class Bed(object):
         """ Merge bed
         """
         os.makedirs(outfolder, exist_ok=True)
-        merged_path = os.path.join(outfolder, self.name + '_M')
+        merged_path = os.path.join(outfolder, self.name + '_M.bed')
 
         cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args,
                                                        merged_path)
@@ -154,7 +154,7 @@ class Bed(object):
         """
 
         os.makedirs(outfolder, exist_ok=True)
-        concat_path = os.path.join(outfolder, self.name + '_concat_' + bedobj.name)
+        concat_path = os.path.join(outfolder, self.name + '_concat_' + bedobj.name + '.bed')
 
         cmd = 'cat {0} {1} | sort -k1,1 -k2,2n > {2}'.format(self.path, bedobj.path,
                                                              concat_path)
@@ -169,7 +169,7 @@ class Bed(object):
 
         os.makedirs(outfolder, exist_ok=True)
         closest_path = os.path.join(outfolder,
-                                    self.name + '-closest-' + bed_obj.name)
+                                    self.name + '-closest-' + bed_obj.name + '.bed')
         
         cmd = 'bedtools closest -a {0} -b {1} {2} > {3}'.format(self.path,
                                                                 bed_obj.path,
@@ -184,7 +184,7 @@ class Bed(object):
 
         os.makedirs(outfolder, exist_ok=True)
         inter_path = os.path.join(outfolder,
-                                  self.name + '-inter-' + bed_obj.name)
+                                  self.name + '-inter-' + bed_obj.name + '.bed')
         cmd = 'bedtools intersect -a {0} -b {1} {2} | bedtools sort > {3}'.format(self.path,
                                                                                   bed_obj.path,
                                                                                   supp_args,
@@ -198,7 +198,7 @@ class Bed(object):
 
         os.makedirs(outfolder, exist_ok=True)
         subtract_path = os.path.join(outfolder,
-                                     self.name + '-minus-' + bed_obj.name)
+                                     self.name + '-minus-' + bed_obj.name + '.bed')
         cmd = 'bedtools subtract -a {0} -b {1} {2} > {3}'.format(self.path,
                                                                  bed_obj.path,
                                                                  supp_args,
@@ -242,7 +242,7 @@ class Bed(object):
         
         for i in range(nshuffle):
             shuffle_path = os.path.join(outfolder,
-                                        self.name + '-shuffle-' + str(i))
+                                        self.name + '-shuffle-' + str(i) + '.bed')
             cmd = 'bedtools shuffle -i {0} -g {1} {2} > {3}'.format(self.path,
                                                                     genome_chro_size,
                                                                     supp_args,
@@ -258,7 +258,7 @@ class Bed(object):
         """Bedtools coverage
         """
         coverage_path = os.path.join(outfolder,
-                                      self.name + '-coveredby-' + bed_obj.name)
+                                      self.name + '-coveredby-' + bed_obj.name + '.bed')
         cmd = 'bedtools coverage -a {0} -b {1} > {2}'.format(self.path,
                                                              bed_obj.path,
                                                              coverage_path)
@@ -272,7 +272,7 @@ class Bed(object):
         """
         
         os.makedirs(outfolder, exist_ok=True)
-        cluster_path = os.path.join(outfolder, self.name + '_clustered')
+        cluster_path = os.path.join(outfolder, self.name + '_clustered' + '.bed')
 
         cmd = 'bedtools cluster -i {0} {1} > {2}'.format(self.path, supp_args,
                                                          cluster_path)
