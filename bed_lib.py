@@ -19,6 +19,7 @@ logger = get_logger('', __name__, logging.DEBUG)
 # Assumptions:
 # For Interval class, bedfile should have 3 or 6 fields
 
+
 def df_to_bed(df, path):
     """ Create a bed object from a pandas dataframe
     """
@@ -127,7 +128,7 @@ class Bed(object):
         """ Sort bed file
         """
         os.makedirs(outfolder, exist_ok=True)
-        sort_path = os.path.join(outfolder, self.name + '_sort')
+        sort_path = os.path.join(outfolder, self.name + '_S')
 
         cmd = 'sort -k1,1 -k2,2n {0} > {1}'.format(self.path, sort_path)
 
@@ -139,7 +140,7 @@ class Bed(object):
         """ Merge bed
         """
         os.makedirs(outfolder, exist_ok=True)
-        merged_path = os.path.join(outfolder, self.name + '_merged')
+        merged_path = os.path.join(outfolder, self.name + '_M')
 
         cmd = 'bedtools merge -i {0} {1} > {2}'.format(self.path, supp_args,
                                                        merged_path)
@@ -147,6 +148,20 @@ class Bed(object):
         subprocess.check_output(cmd, shell=True)
         
         return Bed(merged_path)
+
+    def concat(self, bedobj, outfolder='bed_outfolder'):
+        """Concatenate 2 bed files
+        """
+
+        os.makedirs(outfolder, exist_ok=True)
+        concat_path = os.path.join(outfolder, self.name + '_concat_' + bedobj.name)
+
+        cmd = 'cat {0} {1} | sort -k1,1 -k2,2n > {2}'.format(self.path, bedobj.path,
+                                                             concat_path)
+        subprocess.check_output(cmd, shell=True)
+        
+        return Bed(concat_path)
+                
         
     def closest(self, bed_obj, outfolder='bed_outfolder', supp_args=''):
         """ Make default bedtools closest
