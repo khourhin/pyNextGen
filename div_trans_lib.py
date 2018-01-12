@@ -13,7 +13,7 @@ def bam_filtering(bam):
     """ Filters bam file based on mapping, mapping of mate, splicing
     """
 
-    filt_bam = os.path.splitext(bam)[0] + "_filtered.bam"
+    filt_bam = os.path.splitext(bam)[0] + "_filt.bam"
     
     # Filtering bam, removing unmapped, mate unmapped, spliced, secondary mapping
     cmd = "samtools view -h -F 0x4 -F 0x8 -F 0x100 {0} | awk '{{if ($1 ~ /^@/) {{print}} else if ($6 !~ /N/) {{print}}}}' | samtools view -bh > {1}".format(bam, filt_bam)
