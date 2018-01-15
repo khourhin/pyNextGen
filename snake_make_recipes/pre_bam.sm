@@ -1,5 +1,8 @@
-# EXAMPLE USAGE
-# 
+# EXAMPLE USAGE 
+#
+
+# TOFIX:
+# Cannot reuse already created index out of the box. The make_index rule complains that the folder already exists. Workaround is to comment out the make_index rule and "config['star_index']," in targets.
 
 import glob
 import os
@@ -17,7 +20,7 @@ rule targets:
         expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
         'multiqc_report.html',
         'featureCount/counts',        
-        config['star_index'],
+#        config['star_index'],
         expand('star/{sample}_pass1_SJ.out.tab', sample=SAMPLES),
         expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES)
         
@@ -34,15 +37,15 @@ rule fastqc:
         'fastqc --quiet --outdir qc {input}'
 
         
-rule make_index:
-    input:
-        fas = config['ref_fasta'],
-        gtf = config['gtf']
-    output:
-        idx_dir = config['star_index']
-    threads: 20
-    shell:
-        'mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} 	 --sjdbGTFfile {input.gtf} --runThreadN {threads}'
+# rule make_index:
+#     input:
+#         fas = config['ref_fasta'],
+#         gtf = config['gtf']
+#     output:
+#         idx_dir = config['star_index']
+#     threads: 20
+#     shell:
+#         'mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} 	 --sjdbGTFfile {input.gtf} --runThreadN {threads}'
 
 
 rule star_pass1:
