@@ -126,7 +126,7 @@ class Job():
               help='Path to the json output.')
 @click.option('--gtf', '-g', default=None, type=click.Path(exists=True, resolve_path=True), required=True,
               help='Path to the gtf annotation file.')
-@click.option('--star_index','-i', default=None, type=click.Path(resolve_path=True),
+@click.option('--star_index','-i', default=None, type=click.Path(resolve_path=True), required=True,
               help='Path to the star index directory.')
 @click.option('--ref_fasta','-r', default=None, type=click.Path(exists=True, resolve_path=True),
               help='Path to the reference genome fasta.')
