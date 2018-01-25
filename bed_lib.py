@@ -268,7 +268,7 @@ class Bed(object):
         return Bed(coverage_path)
 
     def cluster(self, outfolder='bed_outfolder', supp_args=''):
-        """ Cluster bed
+        """ Bedtools cluster
         """
         
         os.makedirs(outfolder, exist_ok=True)
@@ -280,6 +280,20 @@ class Bed(object):
         subprocess.check_output(cmd, shell=True)
         
         return Bed(cluster_path)
+
+    def slop(self, left, right, genome_chro_size, outfolder='bed_outfolder',
+             supp_args=''):
+        """ Bedtools slop, forcing use with -l and -r"""
+        
+        os.makedirs(outfolder, exist_ok=True)
+        slop_path = os.path.join(outfolder, self.name + '_slop_l' + str(left) + "_r" + str(right) + '.bed')
+
+        cmd = 'bedtools slop -i {0} -g {1} -l {2} -r {3} {4} > {5}'.format(self.path, genome_chro_size,
+                                                                           left, right, supp_args, slop_path)
+
+        subprocess.check_output(cmd, shell=True)
+        
+        return Bed(slop_path)
         
     
 def merge_bed_list(bed_tuple, outfolder='bed_outfolder'):
