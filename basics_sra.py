@@ -15,6 +15,16 @@ logger = get_logger(__file__, __name__)
 # USAGE EX:
 #for sra in $SRAS; do python ~/code/batsche/methyleu/get_gene_specific_sra.py $sra gene_list_file -f 10000; done
 
+def sra_to_fastq(sra, outdir='.'):
+    """ Function to download a SRA using fastq-dump\
+    TO IMPROVE:
+    - catch potential errors
+    - Add prefetch and automaric md5sum check
+    """
+    
+    cmd = 'fastq-dump --split-files --gzip -O {0} {1}'.format(outdir, sra)
+    subprocess.run(cmd, shell=True, check=True)
+
 
 def get_bam_by_sra_and_gene(sra, gene, flank):
     """From a SRA accession and an couple gene_id/gene/entry from the
