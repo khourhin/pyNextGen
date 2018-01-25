@@ -52,7 +52,8 @@ export_results = function(counts, res, annot){
                            '&position=chr', total_res$chromosome_name, ':', total_res$start_position, '-', total_res$end_position,
                            sep='')
 
-    write.csv(total_res, file=paste(prefix, 'degs_annotated_DESeq2.csv', sep="_"), row.names=FALSE)    
+    write.csv(total_res, file=paste(prefix, 'degs_annotated_DESeq2.csv', sep="_"), row.names=FALSE)
+    return(total_res)
 }
 
 
