@@ -22,8 +22,9 @@ CLUS_CONF=~/Programming/pyNextGen/snake_make_recipes/cluster.conf
 SM_JSON=snakemake.json
 
 # Logs directory (HAS TO FINISH WITH "/")
-
-LOGS_DIR=~/logs/snakemake/$(date +%Y-%m-%d-%H-%M-%S)/;
+#LOGS_DIR=~/logs/snakemake/$(date +%Y-%m-%d-%H-%M-%S)/;
+# Another Good possible locations for logs could be just the working directory
+LOGS_DIR=logs_cluster/X$(date +%Y-%m-%d-%H-%M-%S)/;
 mkdir $LOGS_DIR
 
 snakemake -j 12 --printshellcmds --cluster-config $CLUS_CONF --cluster "sbatch --qos {cluster.qos} --ntasks {cluster.tasks} --cpus-per-task {cluster.cpus} --job-name {cluster.jobName} --output $LOGS_DIR{cluster.output} --error $LOGS_DIR{cluster.error}" -s $SM --configfile $SM_JSON
