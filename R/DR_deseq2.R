@@ -83,6 +83,13 @@ export_pairwise = function(res, annot, prefix=''){
     }
 }
 
+volcano_plot = function(res, title=''){
+    ## From DESEQ2 result, draw a volcano plot
+    with(res, plot(log2FoldChange, -log10(padj), pch=20, main=title))
+    with(subset(res, padj<.05 ), points(log2FoldChange, -log10(padj), pch=20, col="orange"))
+    with(subset(res, padj<.05 & abs(log2FoldChange) > 1), points(log2FoldChange, -log10(padj), pch=20, col="red"))
+}
+
 
 ## SPECIFIC
 annotate = function(counts){
