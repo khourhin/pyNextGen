@@ -4,6 +4,7 @@ library(ggplot2)
 library(ggrepel)
 library(BiocParallel)
 
+
 ### SPECIFIC
 # For now, only getting human hg19 annotations
 
@@ -79,7 +80,7 @@ export_pairwise = function(res, annot, prefix=''){
     ## For pairwise comparisons
     for (compa in names(res)){
         tmp_res = merge(annot, as.data.frame(res[[compa]]), by=0, all.y=TRUE)
-        write.csv(tmp_res, file=paste(prefix, compa, '.csv', sep='_'), row.names=FALSE)
+        write.csv(tmp_res, file=paste(prefix, '_',  compa, '.csv', sep=''), row.names=FALSE)
     }
 }
 
@@ -89,7 +90,6 @@ volcano_plot = function(res, title=''){
     with(subset(res, padj<.05 ), points(log2FoldChange, -log10(padj), pch=20, col="orange"))
     with(subset(res, padj<.05 & abs(log2FoldChange) > 1), points(log2FoldChange, -log10(padj), pch=20, col="red"))
 }
-
 
 ## SPECIFIC
 annotate = function(counts){
