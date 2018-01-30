@@ -132,7 +132,7 @@ rule multiqc:
     shell:
         'multiqc .'
 
-rule indexing:
+rule sam_indexing:
     input:
         bam = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam'
 
