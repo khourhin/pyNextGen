@@ -20,9 +20,11 @@ rule targets:
         expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
         'multiqc_report.html',
         'featureCount/counts',        
-#        config['star_index'],
+        config['star_index'],
         expand('star/{sample}_pass1_SJ.out.tab', sample=SAMPLES),
-        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES)
+        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES),
+        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai', sample=SAMPLES),
+        expand('bigwigs/{sample}_uniqMapper.bw', sample=SAMPLES)
         
 rule fastqc:
     input:
@@ -37,15 +39,15 @@ rule fastqc:
         'fastqc --quiet --outdir qc {input}'
 
         
-# rule make_index:
-#     input:
-#         fas = config['ref_fasta'],
-#         gtf = config['gtf']
-#     output:
-#         idx_dir = config['star_index']
-#     threads: 20
-#     shell:
-#         'mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} 	 --sjdbGTFfile {input.gtf} --runThreadN {threads}'
+rule make_index:
+    input:
+        fas = config['ref_fasta'],
+        gtf = config['gtf']
+    output:
+        idx_dir = config['star_index']
+    threads: 20
+    shell:
+        'mkdir {output.idx_dir} && STAR --runMode genomeGenerate --genomeDir {output.idx_dir} --genomeFastaFiles {input.fas} 	 --sjdbGTFfile {input.gtf} --runThreadN {threads}'
 
 
 rule star_pass1:
@@ -130,4 +132,26 @@ rule multiqc:
     shell:
         'multiqc .'
 
+rule indexing:
+    input:
+        bam = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam'
+
+    output:
+        bai = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai'
+
+    shell:
+        'samtools index {input.bam}'
+
         
+rule bigwig:
+    input:
+        bam = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam',
+        bai = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai'
+        
+    output:
+        bw = 'bigwigs/{sample}_uniqMapper.bw'
+        
+    threads: 12
+
+    shell:
+        'bamCoverage -p {threads} -b {input.bam} -o {output.bw} --minMappingQuality 255'
