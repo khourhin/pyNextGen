@@ -11,6 +11,8 @@ module load fastqc/0.11.5
 module load STAR/2.5.0a
 module load subread/1.4.6-p3
 module load MultiQC/0.7
+module load samtools/1.6
+module load deepTools/2.4.2
 
 # The snakemake file with pipeline rules
 SM=~/Programming/pyNextGen/snake_make_recipes/pre_bam.sm 
