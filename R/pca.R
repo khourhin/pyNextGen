@@ -77,12 +77,17 @@ do.pca = function(counts, meta, file, gene_sel=NULL, lib_sel=NULL,
     
     # THIS SHOULD BE IMPROVED !
     # I think the proper way will be to have groups defined as columns in 'scores' rather than outside
+
+    ## To set equal axes sizes:
+    axe_min = min(pca$x[,1:2])
+    axe_max = max(pca$x[,1:2])
     
     p = ggplot(scores, aes(PC1,PC2, guide=FALSE)) +
-    geom_point(aes(color=factor(groups[,col_group_choice]),
-                   shape=factor(groups[,shape_group_choice])),
-               show.legend=legend) +
-        labs(x='PC1', y='PC2') + 
+        geom_point(aes(color=factor(groups[,col_group_choice]),
+                       shape=factor(groups[,shape_group_choice])),
+                   show.legend=legend) +
+        labs(x='PC1', y='PC2') +
+        xlim(axe_min, axe_max) + ylim(axe_min, axe_max) +
         theme_classic() +
         theme(axis.text = element_text(size = 12))
 
