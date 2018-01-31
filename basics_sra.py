@@ -21,7 +21,7 @@ def sra_to_fastq(sra, outdir='.'):
     - catch potential errors
     - Add automaric md5sum check
     """
-    cmd = 'prefetch {}'.format(sra)
+    cmd = 'prefetch {} --max-size 40G'.format(sra)
     subprocess.run(cmd, shell=True, check=True)
 
     cmd = 'fastq-dump --split-files --gzip -O {0} {1}'.format(outdir, sra)
