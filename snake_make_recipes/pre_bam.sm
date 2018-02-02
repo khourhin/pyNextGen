@@ -1,9 +1,3 @@
-# EXAMPLE USAGE 
-#
-
-# TOFIX:
-# Cannot reuse already created index out of the box. The make_index rule complains that the folder already exists. Workaround is to comment out the make_index rule and "config['star_index']," in targets.
-
 import glob
 import os
 
@@ -19,11 +13,9 @@ rule targets:
     input:
         expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
         'multiqc_report.html',
-        'featureCount/counts',        
-        config['star_index'],
-        expand('star/{sample}_pass1_SJ.out.tab', sample=SAMPLES),
-        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES),
-        expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai', sample=SAMPLES),
+        'featureCount/counts',
+        expand('star/bams/{sample}.bam', sample=SAMPLES),
+        expand('star/bams/{sample}.bam.bai', sample=SAMPLES),
         expand('bigwigs/{sample}_uniqMapper.bw', sample=SAMPLES)
         
 rule fastqc:
@@ -106,9 +98,24 @@ rule star_pass2:
         {params.extra}'
 
 
-rule featureCount:
+rule star_tidy:
     input:
         bams = expand('star/{sample}_pass2_Aligned.sortedByCoord.out.bam', sample=SAMPLES),
+        
+    output:
+        expand('star/bams/{sample}.bam', sample=SAMPLES)
+
+    shell:
+        'rm -r star/*__STARgenome; '
+        'mkdir star/junctions star/logs; '
+        'mv star/*_SJ.out.tab star/junctions; '
+        'mv star/*.bam star/bams; '
+        'mv star/*_Log* star/logs; '
+        'rename "s/_pass2_Aligned.sortedByCoord.out//g" star/bams/*; '
+
+rule featureCount:
+    input:
+        bams = expand('star/bams/{sample}.bam', sample=SAMPLES),
         gtf = config['gtf']
     output:
         'featureCount/counts'
@@ -134,10 +141,10 @@ rule multiqc:
 
 rule sam_indexing:
     input:
-        bam = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam'
+        bam = 'star/bams/{sample}.bam'
 
     output:
-        bai = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai'
+        bai = 'star/bams/{sample}.bam.bai'
 
     shell:
         'samtools index {input.bam}'
@@ -145,8 +152,8 @@ rule sam_indexing:
         
 rule bigwig:
     input:
-        bam = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam',
-        bai = 'star/{sample}_pass2_Aligned.sortedByCoord.out.bam.bai'
+        bam = 'star/bams/{sample}.bam',
+        bai = 'star/bams/{sample}.bam.bai'
         
     output:
         bw = 'bigwigs/{sample}_uniqMapper.bw'
