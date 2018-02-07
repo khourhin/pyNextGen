@@ -44,11 +44,11 @@ class Blasting(object):
         """
 
         cmd = ('blastx -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
-               .format(query=self.query, db=self.db, outfile='blast_out',
+               .format(query=self.query, db=self.db, outfile=self.outfile,
                        outfmt='6', evalue='1e-6', threads=self.cpus))
 
-        if onlyBest:
-            cmd = cmd + '-max_target_seqs', '1'
+        if self.onlybest:
+            cmd = cmd + ' -max_target_seqs 1'
 
         logger.info('Executing: {cmd}'.format(cmd=cmd))
         subprocess.check_output(cmd, shell=True)
@@ -63,7 +63,9 @@ class Blasting(object):
 @click.option('--query', '-q', required=True, type=click.Path(exists=True, resolve_path=True))
 @click.option('--db', '-d', required=True, type=click.Path(exists=True, resolve_path=True))
 @click.option('--dbtype', '-t', default='nucl', type=click.Choice(['nucl', 'prot']))
-@click.option('--cpus', '-c', default=1, type=int)
+@click.option('--outfile', '-o', default='blast_out.txt', type=click.Path(resolve_path=True))
+@click.option('--cpus', '-c', default=1, type=click.INT)
+@click.option('--onlybest', default=False, flag_value=True)
 def main(**kwargs):
     """A blast interface"""
     
