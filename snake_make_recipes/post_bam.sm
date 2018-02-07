@@ -24,11 +24,11 @@ print(SAMPLE)
 rule targets:
     input:
         #'featureCount/counts',
-        #expand('qorts/{sample}', sample=SAMPLE),
-        #expand('qualimap/{sample}', sample=SAMPLE),
+        expand('qorts/{sample}', sample=SAMPLE),
+        expand('qualimap/{sample}', sample=SAMPLE),
         #'multiqc_report.html',
         #        expand('logs/rseqc_rd_{sample}_log.out', sample=SAMPLE)
-        expand('bw/{sample}.bw', sample=SAMPLE),
+        #expand('bw/{sample}.bw', sample=SAMPLE),
         expand(os.path.join(config['bamdir'], '{sample}.bam.bai'), sample=SAMPLE),
         
 rule qorts:
@@ -46,8 +46,7 @@ rule qorts:
         defaults = config['qorts']
         
     shell:
-        'qorts -Xmx16g -Xms8g QC {params.defaults} --runFunctions writeKnownSplices,writeNovelSplices,writeSpliceExon {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
-
+        'qorts -Xmx16g -Xms8g QC {params.defaults} {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
         
 rule qualimap:
     input:
@@ -62,7 +61,7 @@ rule qualimap:
     params:
         defaults = config['qualimap']
     shell:
-        'qualimap rnaseq --java-mem-size=16G {params.defaults} -bam {input} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
+        'qualimap rnaseq --java-mem-size=16G {params.defaults} -bam {input.bam} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
 
 
 rule featureCount:
