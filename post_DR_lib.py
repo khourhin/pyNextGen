@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 # The DR tables should be created with the new version of DR notebook:
 # http://localhost:8888/notebooks/Programming/jupyter/good_practices/DEG_DESeq2_1.0.ipynb
 
+# IMPROVEMENTS:
+# Object for a list of DR comparisons
+# Describe a genes (in which compa is DR, tables for each compa, expression plots, etc...)
 
 class Deseq2Results(object):
     """Documentation for Deseq2Results

@@ -71,7 +71,7 @@ def fasta_stats(fasta):
 
     print(fasta_df.to_csv())
     
-    plt.hist(fasta_df['seq_len'])
+    plt.hist(fasta_df['seq_len'], bins=200)
     plt.title('Sequence length frequencies')
     plt.show()
 

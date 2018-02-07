@@ -1,9 +1,11 @@
 #! /usr/bin/env python 
 
-from bokeh.charts import Bar, Histogram, output_file, show
+from bokeh.io import output_file, show
+from bokeh.plotting import figure
 import sys
 import pandas as pd
 import argparse
+import numpy as np
 
 # WARNINGS !!!
 # NOW working with only one column (for hist)
@@ -17,21 +19,18 @@ def summary(df, clim):
     d = df['a'].value_counts().sort_values(ascending=False)
     print(d.head(min(d.shape[0], clim)))
 
-    
-def hist(df):
 
-    hist_plot = Histogram(df)
-
-    output_file('/tmp/serial_plotter_plot.html', title='Serial Plotter plot')
-    show(hist_plot)
-
-    
 def bar_hist(df):
 
     d = df['a'].value_counts().sort_values(ascending=False)
-    hist_plot = Bar(d, legend=None)
-    output_file('/tmp/serial_plotter_plot.html', title='Serial Plotter plot')
-    show(hist_plot)
+
+    f = figure(title="BLA",tools="save",
+               background_fill_color="#E8DDCB")
+    hist, edges = np.histogram(df['a'], bins=50)
+    f.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:])
+    show(f)
+
+    print(d)
 
     
 def get_input(sep):
@@ -53,9 +52,6 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--sep',
                         help='The character used for field separator in the stdin table',
                         default='\t')
-    parser.add_argument('--hist',
-                        help='Plot a classic histogram',
-                        dest='action', action='store_const', const=hist)
     parser.add_argument('--barhist',
                         help='Plot a bar plot histogram',
                         dest='action', action='store_const', const=bar_hist)
