@@ -132,6 +132,8 @@ class Job():
               help='Path to the reference genome fasta.')
 @click.option('--kallisto_index','-k', default=None, type=click.Path(exists=True, resolve_path=True),
               help='Path to the kallisto transcriptome index.')
+@click.option('--ref_bed', default=None, type=click.Path(exists=True, resolve_path=True),
+              help='Path to the refseq genes bed for RseqQC.')
 def main(**kwargs):
     """A configuration tool to automatically generate input files for
     snakemake workflows
