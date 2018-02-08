@@ -51,9 +51,12 @@ class Blasting(object):
             cmd = cmd + ' -max_target_seqs 1'
 
         logger.info('Executing: {cmd}'.format(cmd=cmd))
-        subprocess.check_output(cmd, shell=True)
         
-            
+        try:
+            subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            print(e.output.decode())
+
     def run(self):
 
         self.format_db()
