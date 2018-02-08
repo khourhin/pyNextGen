@@ -52,6 +52,15 @@ class Fasta(object):
         plt.show()
 
 
+class TrinityFasta(Fasta):
+    """
+    A Fasta file out of Trinity de-novo assembler
+    """
+    
+    def get_stats(self):
+        fasta_df = super().get_stats()
+
+
 def dedup_fasta(fasta, fasta_out=None, graph=True):
     """
     From a fasta file return a dictionary with the duplicate sequences
