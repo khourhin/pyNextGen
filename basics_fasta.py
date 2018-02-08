@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import argparse
 import pysam
 import basics_nuc_seq as bns
 import matplotlib.pyplot as plt
@@ -15,6 +14,43 @@ logger = get_logger(__file__, __name__)
 
 # TODO: check if dedup_fasta can be improved using yield as in
 # /home/ekornobis/code/allemand/gphn/7.2_generate_ref_before_rsem.py
+
+
+class Fasta(object):
+    """A Fasta sequence file object
+    """
+    def __init__(self, path):
+        self.path = path
+
+    def __repr__(self):
+        return '<Fasta Object for: {}'.format(self.path)
+
+    def get_stats(self):
+        """
+        Produce statistics on the sequences in the fasta file
+        """
+        
+        logger.info("Producing stats for: %s" % self.path)
+
+        fasta_df = pd.DataFrame({
+            'seq_names': [seq.name for seq in pysam.FastxFile(self.path)],
+            'seq_len': [len(seq.sequence) for seq in pysam.FastxFile(self.path)],
+            'GC_content': [bns.get_seq_GC(seq.sequence) for seq in pysam.FastxFile(self.path)],
+            'Ns': [seq.sequence.count('N') for seq in pysam.FastxFile(self.path)],
+        })
+
+        return fasta_df
+
+    def summary(self):
+        """
+        Produce a statistic summary for the Fasta file
+        """
+        
+        fasta_df = self.get_stats()
+        plt.hist(fasta_df['seq_len'], bins=200)
+        plt.title('Sequence length frequencies')
+        plt.show()
+
 
 def dedup_fasta(fasta, fasta_out=None, graph=True):
     """
@@ -57,35 +93,17 @@ def dedup_fasta(fasta, fasta_out=None, graph=True):
 
     return dedup_dict
 
+
 @click.command()
 @click.argument('fasta')
-def fasta_stats(fasta):
-    logger.info("Producing stats for: %s" % fasta)
-
-    fasta_df = pd.DataFrame({
-        'seq_names': [seq.name for seq in pysam.FastxFile(fasta)],
-        'seq_len': [len(seq.sequence) for seq in pysam.FastxFile(fasta)],
-        'GC_content': [bns.get_seq_GC(seq.sequence) for seq in pysam.FastxFile(fasta)],
-        'Ns': [seq.sequence.count('N') for seq in pysam.FastxFile(fasta)],
-    })
-
-    print(fasta_df.to_csv())
+def main(fasta):
     
-    plt.hist(fasta_df['seq_len'], bins=200)
-    plt.title('Sequence length frequencies')
-    plt.show()
+    f = Fasta(fasta)
+
+    f.summary()
 
     
 if __name__ == "__main__":
 
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('fastaIn', help='')
-    # parser.add_argument('fastaOut', help='')
-    # parser.add_argument('--noGraph', help='', action='store_false')
-
-    # args = parser.parse_args()
-
-    # fasta_stats(args.fas)
-#    dedup_fasta(args.fastaIn, args.fastaOut, args.noGraph)
-    fasta_stats()
+    main()
     
