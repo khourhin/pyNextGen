@@ -133,6 +133,8 @@ rule multiqc:
     input:
         'featureCount/counts',
         expand('qc/{sample}{read_pairs}_fastqc.html', sample=SAMPLES, read_pairs=READ_PAIRS),
+        expand('qorts/{sample}', sample=SAMPLES),
+        expand('qualimap/{sample}', sample=SAMPLES),
 
     output:
         'multiqc_report.html'
@@ -162,3 +164,38 @@ rule bigwig:
 
     shell:
         'bamCoverage -p {threads} -b {input.bam} -o {output.bw} --minMappingQuality 255'
+
+        
+rule qorts:
+    input:
+        bam = 'star/bams/{sample}.bam',
+        gtf = config['gtf']
+        
+    output:
+        'qorts/{sample}'
+    log:
+        err = 'logs/qorts_{sample}_log.err',
+        out = 'logs/qorts_{sample}_log.out'
+
+    threads: 10
+    params:
+        defaults = config['qorts']
+        
+    shell:
+        'qorts -Xmx16g -Xms8g QC {params.defaults} {input.bam} {input.gtf} {output} 1>> {log.out} 2>> {log.err}'
+
+        
+rule qualimap:
+    input:
+        bam = 'star/bams/{sample}.bam',
+        gtf = config['gtf']
+    output:
+        'qualimap/{sample}'
+    log:
+        err = 'logs/qualimap_{sample}_log.err',
+        out = 'logs/qualimap_{sample}_log.out'
+    threads: 10
+    params:
+        defaults = config['qualimap']
+    shell:
+        'qualimap rnaseq --java-mem-size=16G {params.defaults} -bam {input.bam} -gtf {input.gtf} -outdir {output} 1>> {log.out} 2>> {log.err}'
