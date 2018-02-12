@@ -77,8 +77,8 @@ class Bed(object):
         return self
 
     def to_dataframe(self, index_col=0):
-        return pd.DataFrame.from_csv(self.path, sep='\t', header=None,
-                                     index_col=index_col)
+        return pd.read_csv(self.path, sep='\t', header=None,
+                           index_col=index_col)
 
     def get_intervals(self):
         with open(self.path) as bed:
