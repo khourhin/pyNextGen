@@ -53,20 +53,34 @@ class Blasting(object):
         
         if db_exist:
             logger.info('Database already formatted for file: {}'.format(self.db))
-            logger.info(db_exist)
             
         else:
-            cmd = 'makeblastdb -dbtype {dbtype} -in {fasta}'.format(dbtype=self.dbtype, fasta=self.db)    
+            logger.info('Formating database: {}'.format(self.db))
+            cmd = 'makeblastdb -dbtype {dbtype} -in {fasta}'.format(dbtype=self.dbtype, fasta=self.db)
             subprocess.check_output(cmd, shell=True)
 
-    def blastx(self, only_best=False, sup_args=''):
+
+    def blast(self, only_best=False, sup_args=''):
         """
-        Run the blastx analysis
+        Run the blast analysis:
+
+        TO IMPROVE
+
+        ASSUMPTIONS:
+        - The query is always nucleotides
+        - So this method performs blastx if dbtype=prot and blastn if dbtype=nucl
         """
 
-        cmd = ('blastx -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
-               .format(query=self.query, db=self.db, outfile=self.outfile,
-                       outfmt='6', evalue='1e-6', threads=self.cpus))
+        if self.dbtype == 'prot':
+        
+            cmd = ('blastx -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
+                   .format(query=self.query, db=self.db, outfile=self.outfile,
+                           outfmt='6', evalue='1e-6', threads=self.cpus))
+
+        elif self.dbtype == 'nucl':
+            cmd = ('blastn -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
+                   .format(query=self.query, db=self.db, outfile=self.outfile,
+                           outfmt='6', evalue='1e-6', threads=self.cpus))
 
         if self.only_best:
             cmd = cmd + ' -max_target_seqs 1'
