@@ -7,9 +7,69 @@ from multiprocessing import Pool
 import argparse
 import os
 from mylog import get_logger
+import pandas as pd
+from utils import simplify_path
 
 logger = get_logger(__file__, __name__)
 
+# TO IMPROVE
+# Make Fastq a proper iterator object (__iter__, next etc...)
+
+
+################################################################################
+# OO VERSION
+
+class Fastq(object):
+    def __init__(self, path):
+        self.path = path
+        self.name = simplify_path(path)
+
+    def __repr__(self):
+        return '<Fastq object: {}>'.format(self.path)
+
+    def iterate_fastq(self):
+        """ Iterate through a fastq file """
+
+        with pysam.FastxFile(self.path) as fq:
+            for read in fq:
+                yield read
+
+    def get_stats(self):
+        """
+        Get stats from a fastq (or gz compressed fastq) file
+        
+        Return a dictionnary of stats
+        """
+
+        rds_len = []
+        GC_content = []
+        N_count = 0
+
+        logger.info("Producing stats for: %s" % self.path)
+        
+        for read in self.iterate_fastq():
+            rds_len.append(len(read.sequence))
+            GC_content.append(bns.get_seq_GC(read.sequence))
+            N_count += read.sequence.count("N")
+
+        stats_df = pd.DataFrame({
+            "FileName": os.path.basename(self.path),
+            "Nreads(M)": len(rds_len) / 1.0e6,
+            "Nbases(G)": sum(rds_len) / 1.0e9,
+            "Ns": N_count,
+            "MinLen": min(rds_len),
+            "MaxLen": max(rds_len),
+            "MeanLen": numpy.mean(rds_len),
+            "StdevLen": numpy.std(rds_len),
+            "MeanGC": numpy.mean(GC_content),
+        }, index=[self.name])
+        
+        return stats_df
+
+
+
+################################################################################
+# FUNCTION VERSION
 
 def iterate_fastq(fastq):
     """ Iterate through a fastq file """
