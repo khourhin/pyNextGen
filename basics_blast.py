@@ -1,44 +1,65 @@
 #! /usr/bin/env python3
 
-import sys
 import os
 import subprocess
 
 import click
+import pandas as pd
+
 from mylog import get_logger
 
 logger = get_logger(__file__, __name__)
 
+
 class Blasting(object):
     """Automatize the blasting workflow
     """
-    
+
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-            
     def __repr__(self):
         return '<Blasting object query:{query}; db:{db}>'.format(query=self.query,
                                                                  db=self.db)
-    
+
+    def detect_db_type(self):
+        """ Automatically detect the type of db ie either nucl or prot"""
+        # TO DO
+        pass
+                
+    def format_results(self):
+        """Properly format the blast results
+
+        WARNING: For now, only the outfmt=6 case is treated"""
+
+        blast_df = pd.read_csv(self.outfile, sep='\t',
+                               header=None, names=['qseqid', 'sseqid', 'pident', 'length',
+                                                   'mismatch', 'gapopen', 'qstart', 'qend',
+                                                   'sstart', 'send', 'evalue', 'bitscore'])
+
+        
+        
+        return blast_df
+
     def format_db(self):
         """
         Format a fasta file for having them as db for blast+
         """
 
         # Check if formatting db files already existing
-        db_exts = ['.phr', '.pin', '.psq'] if self.dbtype=='prot' else ['.nhr', '.nin', '.nsq']
-        db_exist = [os.path.isfile(self.db + s) for s in db_exts]
+        db_exts = ['.phr', '.pin', '.psq'] if self.dbtype == 'prot' else ['.nhr', '.nin', '.nsq']
+        db_exist = all([os.path.isfile(self.db + s) for s in db_exts])
         
         if db_exist:
             logger.info('Database already formatted for file: {}'.format(self.db))
+            logger.info(db_exist)
             
         else:
             cmd = 'makeblastdb -dbtype {dbtype} -in {fasta}'.format(dbtype=self.dbtype, fasta=self.db)    
             subprocess.check_output(cmd, shell=True)
 
-    def blastx(self, onlyBest=False):
+    def blastx(self, only_best=False, sup_args=''):
         """
         Run the blastx analysis
         """
@@ -47,7 +68,7 @@ class Blasting(object):
                .format(query=self.query, db=self.db, outfile=self.outfile,
                        outfmt='6', evalue='1e-6', threads=self.cpus))
 
-        if self.onlybest:
+        if self.only_best:
             cmd = cmd + ' -max_target_seqs 1'
 
         logger.info('Executing: {cmd}'.format(cmd=cmd))
@@ -60,7 +81,15 @@ class Blasting(object):
     def run(self):
 
         self.format_db()
-        self.blastx()
+
+        if os.path.isfile(self.outfile):
+            logger.info('Blast results already computed apparently, so using available file: {}'.format(self.outfile))
+        else:
+            self.blastx()
+
+        res_df = self.format_results()
+        return res_df
+
 
 @click.command()
 @click.option('--query', '-q', required=True, type=click.Path(exists=True, resolve_path=True))
@@ -78,32 +107,3 @@ def main(**kwargs):
     
 if __name__ == '__main__':
     main()
-
-################################################################################
-# LEGACY
-
-# ASSUMPTIONS:
-# Blast results are in -outfmt 6 format
-
-# blast_out = "/home/ekornobis/analysis/allemand/v4/blast5_sup27.tab"
-
-# # Plotting blast results
-# blast_res = np.genfromtxt(blast_out, dtype=None,
-#                   names="qseqid,sseqid,pident,length,mismatch,gapopen,qstart,qend,sstart,send,evalue,bitscore")
-
-
-# res_l = blast_res['length']
-# plt.hist(res_l, range(0, max(res_l), 10))
-# plt.show()
-
-
-# def do_blastP(query, db, outfile, onlyBest=False):
-#     """
-#     Launched a blastp analysis for the [query] against the [db]
-#     """
-#     cmd = [PATH_BLAST + 'blastp', '-query', query, '-db', db, '-out', outfile,
-#            '-outfmt', '6', '-evalue', '1e-6']
-#     if onlyBest:
-#         cmd = cmd + [ '-max_target_seqs', '1' ]
-#     proc = subprocess.Popen( cmd, stdout=subprocess.PIPE)
-#     out, err = proc.communicate()    
