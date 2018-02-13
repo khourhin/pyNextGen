@@ -38,6 +38,7 @@ class Fasta(object):
             'GC_content': [bns.get_seq_GC(seq.sequence) for seq in pysam.FastxFile(self.path)],
             'Ns': [seq.sequence.count('N') for seq in pysam.FastxFile(self.path)],
         })
+        fasta_df = fasta_df.set_index('seq_names')
 
         return fasta_df
 
@@ -47,9 +48,13 @@ class Fasta(object):
         """
         
         fasta_df = self.get_stats()
-        plt.hist(fasta_df['seq_len'], bins=200)
-        plt.title('Sequence length frequencies')
+        plt.boxplot(fasta_df['seq_len'])
+        plt.title('Sequence length boxplot')
         plt.show()
+
+        print(fasta_df.describe())
+
+        return fasta_df
 
 
 class TrinityFasta(Fasta):
