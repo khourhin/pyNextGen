@@ -20,7 +20,11 @@ class Fasta(object):
     """A Fasta sequence file object
     """
     def __init__(self, path):
-        self.path = path
+
+        if os.path.isfile(path):
+            self.path = path
+        else:
+            raise IOError('No such file: {}'.format(path))
 
     def __repr__(self):
         return '<Fasta Object for: {}'.format(self.path)
