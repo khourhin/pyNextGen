@@ -37,8 +37,6 @@ class Blasting(object):
                                header=None, names=['qseqid', 'sseqid', 'pident', 'length',
                                                    'mismatch', 'gapopen', 'qstart', 'qend',
                                                    'sstart', 'send', 'evalue', 'bitscore'])
-
-        
         
         return blast_df
 
@@ -75,12 +73,12 @@ class Blasting(object):
         
             cmd = ('blastx -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
                    .format(query=self.query, db=self.db, outfile=self.outfile,
-                           outfmt='6', evalue='1e-6', threads=self.cpus))
+                           outfmt=self.outfmt, evalue=self.evalue, threads=self.cpus))
 
         elif self.dbtype == 'nucl':
             cmd = ('blastn -query {query} -db {db} -out {outfile} -outfmt {outfmt} -evalue {evalue} -num_threads {threads}'
                    .format(query=self.query, db=self.db, outfile=self.outfile,
-                           outfmt='6', evalue='1e-6', threads=self.cpus))
+                           outfmt=self.outfmt, evalue=self.evalue, threads=self.cpus))
 
         if self.only_best:
             cmd = cmd + ' -max_target_seqs 1'
@@ -105,19 +103,21 @@ class Blasting(object):
         return res_df
 
 
-@click.command()
-@click.option('--query', '-q', required=True, type=click.Path(exists=True, resolve_path=True))
-@click.option('--db', '-d', required=True, type=click.Path(exists=True, resolve_path=True))
-@click.option('--dbtype', '-t', default='nucl', type=click.Choice(['nucl', 'prot']))
-@click.option('--outfile', '-o', default='blast_out.txt', type=click.Path(resolve_path=True))
-@click.option('--cpus', '-c', default=1, type=click.INT)
-@click.option('--onlybest', default=False, flag_value=True)
-def main(**kwargs):
-    """A blast interface"""
+# FOR LEGACY, BROCKEN BY ADDING BLasting self attributes for outfmt, evalue, etc ...
+
+# @click.command()
+# @click.option('--query', '-q', required=True, type=click.Path(exists=True, resolve_path=True))
+# @click.option('--db', '-d', required=True, type=click.Path(exists=True, resolve_path=True))
+# @click.option('--dbtype', '-t', default='nucl', type=click.Choice(['nucl', 'prot']))
+# @click.option('--outfile', '-o', default='blast_out.txt', type=click.Path(resolve_path=True))
+# @click.option('--cpus', '-c', default=1, type=click.INT)
+# @click.option('--onlybest', default=False, flag_value=True)
+# def main(**kwargs):
+#     """A blast interface"""
     
-    b = Blasting(**kwargs)
-    b.run()
+#     b = Blasting(**kwargs)
+#     b.run()
     
     
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
