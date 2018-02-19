@@ -2,7 +2,7 @@ import argparse
 from collections import Counter
 from mylog import get_logger
 import pysam
-import pysamstats
+#import pysamstats
 from utils import apply_threads, simplify_path
 import os
 
@@ -61,6 +61,9 @@ def overall_mapped_bases_composition(bam):
     for k, v in all_counts.items():
         logger.info('{0}: {1}'.format(k, v))
 
+
+### BROCKEN FOR NOW:
+# Last checked, pysamstats was giving an error at import
         
 def write_region_coverage(interval, bam, flank):
     """
