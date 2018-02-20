@@ -92,11 +92,10 @@ class Blasting(object):
 
     def run(self):
 
-        self.format_db()
-
         if os.path.isfile(self.outfile):
             logger.info('Blast results already computed apparently, so using available file: {}'.format(self.outfile))
         else:
+            self.format_db()
             self.blast()
 
         res_df = self.format_results()
