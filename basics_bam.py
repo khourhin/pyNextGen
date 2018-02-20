@@ -19,7 +19,7 @@ def open_bam(bam):
     with pysam.AlignmentFile(bam, 'rb') as f:
         for i, read in enumerate(f):
             if i % 1000000 == 0:
-                logger.info("Reached {} reads.".format(i))
+                logger.debug("Reached {} reads.".format(i))
             yield read
 
 
