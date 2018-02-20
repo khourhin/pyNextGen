@@ -13,6 +13,16 @@ logger = get_logger(__file__, __name__)
 
 class Blasting(object):
     """Automatize the blasting workflow
+
+    Keyword arguments:
+    query: 
+    db: 
+    cpus:
+    outfile:
+    only_best:
+    outfmt:
+    evalue:
+    dbtype:
     """
 
     def __init__(self, **kwargs):
