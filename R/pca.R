@@ -19,7 +19,7 @@ get.normalized.counts = function(counts, meta){
     return(all_cpms)
 }
 
-get.loadings = function(counts, PC='PC1', n=10){
+get.loadings = function(counts, PC='PC1', n=10, annot=TRUE){
     # Plot loadings of each genes 
     
     pca = prcomp(t(counts))
@@ -32,7 +32,13 @@ get.loadings = function(counts, PC='PC1', n=10){
     plot(sort(loadings.perc[,PC]))
     
     sup.loadings = sort(loadings.perc[,PC], decreasing=T)[0:n]
-    res = cbind(annot[names(sup.loadings),], sup.loadings)
+
+    if (annot==TRUE){
+        res = cbind(annot[names(sup.loadings),], sup.loadings)
+    }
+    else{
+        res = sup.loadings
+    }
     
     #print(annot[names(sort(loadings.perc[,PC], decreasing=T)[0:10]),])
     
