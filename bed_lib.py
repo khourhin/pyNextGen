@@ -113,16 +113,19 @@ class Bed(object):
                 'name': self.name,
                 'bedobj': self}
 
-    def plot(self):
+    def plot(self, log=False):
         """
         Summarize stats with plots
         """
         
         len_distrib = self.get_length_distribution()
-        pd.DataFrame(len_distrib).hist(bins=100)
+        
+        pd.DataFrame(len_distrib).plot(kind='hist', bins=100, log=log)
         plt.title('{}: Histogram of interval lengths'.format(self.name))
         plt.xlabel('Interval length')
         plt.ylabel('Frequencies')
+
+        pd.DataFrame(len_distrib).plot(kind='box')
 
     def sort(self, outfolder='bed_outfolder', supp_args=''):
         """ Sort bed file
