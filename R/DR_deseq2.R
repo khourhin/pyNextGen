@@ -5,8 +5,16 @@ library(ggrepel)
 library(BiocParallel)
 
 
-### SPECIFIC
-# For now, only getting human hg19 annotations
+### LIMITATIONS
+## For now, only getting human hg19 and mm38 annotations
+
+## DEFAULTS
+## Normalized counts using counts function in DESEQ (could use rlog and vst as well)
+
+## IMPROVEMENTS
+## - ucsc link ?
+## For pairwise export: currently annotation is run for each comparison. Could be launched only once
+
 
 ## USING 10 threads by default
 register(MulticoreParam(10))
@@ -39,22 +47,36 @@ make_DR = function(counts, meta, design){
     return(dds)
 }
 
-export_results = function(counts, res, annot){
+
+export_counts = function(dds, prefix='', species=''){
+    #rlog = rlog(dds, blind=FALSE)
+    #vsd = varianceStabilizingTransformation(dds, blind=FALSE)
+
+    counts = counts(dds)
+    norm_counts = counts(dds, normalized=TRUE)
+
+    if (species != ''){
+        annot = annotate(counts, species=species)
+
+        counts = merge(annot, counts, by=0, all.y=TRUE)
+        norm_counts = merge(annot, norm_counts, by=0, all.y=TRUE)
+    }
     
-    annot_counts = merge(annot,counts, by=0, all=TRUE)
-    write.csv(annot_counts, paste(prefix, 'raw_counts_annot.csv', sep="_"), row.names=FALSE)
+    write.csv(counts, paste0(prefix, 'counts_raw.csv'), row.names=FALSE)
+    write.csv(norm_counts, paste0(prefix, 'counts_norm.csv'), row.names=FALSE)
+}
 
-    ## Add the annotation produced earlier
-    total_res =  merge(annot,as.data.frame(res), by=0, all.y=TRUE)
 
-    ## UCSC specific !!! Might have to remove the "chr" at some point
-    total_res$ucsc = paste('http://genome.ucsc.edu/cgi-bin/hgTracks?org=', 'human',
-                           '&db=','hg19',
-                           '&position=chr', total_res$chromosome_name, ':', total_res$start_position, '-', total_res$end_position,
-                           sep='')
+export_results = function(res, species='', prefix=''){
+    ## Export the DE results table with annotation if species provided
 
-    write.csv(total_res, file=paste(prefix, 'degs_annotated_DESeq2.csv', sep="_"), row.names=FALSE)
-    return(total_res)
+    if (species != ''){
+        annot = annotate(as.data.frame(res), species=species)
+        res =  merge(annot,as.data.frame(res), by=0, all.y=TRUE)
+    }
+    
+    write.csv(res, file=paste(prefix, 'degs_DESeq2.csv', sep="_"))
+    return(res)
 }
 
 
@@ -67,7 +89,7 @@ pairwise_comparison = function(comps, meta_col_name){
     for (comp in comps){
         compa_name = paste(c(comp[1], comp[2]), collapse="_VS_")
         message(compa_name)
-        res_i = results(dds, addMLE=TRUE, contrast=c(meta_col_name, comp[1], comp[2]), alpha=0.05, parallel=TRUE)
+        res_i = results(dds, contrast=c(meta_col_name, comp[1], comp[2]), alpha=0.05, parallel=FALSE)
         summary(res_i)
         
         compa_res[[compa_name]] = res_i
@@ -76,11 +98,12 @@ pairwise_comparison = function(comps, meta_col_name){
 }
 
 
-export_pairwise = function(res, annot, prefix=''){
+export_pairwise = function(res, species='', prefix=''){
     ## For pairwise comparisons
     for (compa in names(res)){
-        tmp_res = merge(annot, as.data.frame(res[[compa]]), by=0, all.y=TRUE)
-        write.csv(tmp_res, file=paste(prefix, '_',  compa, '.csv', sep=''), row.names=FALSE)
+        export_results(res[[compa]], species=species, prefix=paste(prefix, '_', compa, sep=''))
+        #tmp_res = merge(annot, as.data.frame(res[[compa]]), by=0, all.y=TRUE)
+        #write.csv(tmp_res, file=paste(prefix, '_',  compa, '.csv', sep=''), row.names=FALSE)
     }
 }
 
@@ -91,13 +114,20 @@ volcano_plot = function(res, title=''){
     with(subset(res, padj<.05 & abs(log2FoldChange) > 1), points(log2FoldChange, -log10(padj), pch=20, col="red"))
 }
 
-## SPECIFIC
-annotate = function(counts){
-    ## From a count matrix with ensembl IDs get the corresponding
-    ## annotation from bioMart
 
-    ## Select database and dataset 
-    grch37 = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
+annotate = function(df, species=''){
+    ## From a dataframe with ensembl identifiers as rownames get the
+    ## corresponding annotation from bioMart
+
+    ## Select database and dataset
+    if (species == 'human'){
+        ensembl = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
+    }
+    else if (species == 'mouse'){
+        ensembl = useMart(biomart="ensembl",
+                          dataset="mmusculus_gene_ensembl")
+    }
+    else stop('Unavailable or No species selected for annotation.')
 
     ## Edit to fetch the correct database
     annot <- getBM(attributes = c("ensembl_gene_id", 
@@ -105,7 +135,7 @@ annotate = function(counts){
                                   "chromosome_name",
                                   "start_position", 
                                   "end_position", 
-                                  "strand"), filter="ensembl_gene_id", values=rownames(counts),mart=grch37)
+                                  "strand"), filter="ensembl_gene_id", values=rownames(counts),mart=ensembl)
 
     rownames(annot) = annot$ensembl_gene_id
     annot = annot[,-1]
