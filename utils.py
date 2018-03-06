@@ -26,7 +26,8 @@ def simplify_path(filename, prefix='', suffix='', keep_path=False, check_exist=T
     output_name = prefix + output_name + suffix
 
     if check_exist and os.path.exists(output_name):
-        logger.warning('File already exists: {}'.format(output_name))
+        logger.error('File already exists: {}'.format(output_name))
+        raise IOError('File already exists: {}'.format(output_name))
     
     return output_name
 
