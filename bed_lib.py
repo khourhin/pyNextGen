@@ -45,6 +45,11 @@ class Interval(object):
             self.score = line[4]
             self.strand = line[5]
 
+    def __repr__(self):
+        return 'Interval: {0}:{1}-{2}'.format(self.chro,
+                                              self.start,
+                                              self.end)
+
     def __len__(self):
         return self.end - self.start
 
@@ -83,7 +88,11 @@ class Bed(object):
     def get_intervals(self):
         with open(self.path) as bed:
             for line in bed:
-                yield Interval(line)
+                # Skip the track definition line 
+                if line.startswith('track'):
+                    continue
+                else:
+                    yield Interval(line)
 
     def get_length_distribution(self):
 
