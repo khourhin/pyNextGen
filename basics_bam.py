@@ -19,10 +19,19 @@ def open_bam(bam):
     with pysam.AlignmentFile(bam, 'rb') as f:
         for i, read in enumerate(f):
             if i % 1000000 == 0:
-                logger.debug("Reached {} reads.".format(i))
+                logger.info("Reached {} reads.".format(i))
             yield read
 
+            
+def get_polyNs_read(bam, poly_len, poly_char):
+    """ Get reads with a polyN tail
+    """
+    
+    for read in open_bam(bam):
+        if read.seq.endswith(poly_char * poly_len):
+            yield read
 
+            
 def get_read_by_id(id_list, bam):
     """
     Get the alignement from a bam file given an read id_list

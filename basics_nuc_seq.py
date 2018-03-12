@@ -10,6 +10,19 @@ def get_seq_GC(seq):
     GC_content = ( n_C + n_G ) / float(len(seq))
     return GC_content
 
+
+def get_bases_composition(seq):
+    """
+    Proportion of A,T,G,C bases in a sequence
+    """
+    seq = seq.lower()
+    n_A = seq.count("a")
+    n_T = seq.count("t")
+    n_G = seq.count("g")
+    n_C = seq.count("c")
+
+    return {'A': n_A, 'T': n_T, 'G': n_G, 'C': n_C}
+        
 #-------------------------------------------------------------------------------
 def get_all_GCs(seq_d):
     """
@@ -19,6 +32,16 @@ def get_all_GCs(seq_d):
     GCs_d = {k: get_seq_GC( seq_d[k] ) for k in seq_d }
     
     return GCs_d
+
+
+def get_all_bases_compositions(seq_d):
+    """
+    From a seq_dict, return all the bases compositions
+    """
+
+    bases_comp_d = {k: get_bases_composition( seq_d[k] ) for k in seq_d }
+
+    return bases_comp_d
 
 #-------------------------------------------------------------------------------
 def get_all_lens(seq_d):
@@ -49,3 +72,5 @@ def get_N50(seq_d):
     return N50
 
 #-------------------------------------------------------------------------------
+
+    
