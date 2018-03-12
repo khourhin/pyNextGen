@@ -3,6 +3,7 @@
 import subprocess
 from multiprocessing import Pool
 from functools import partial
+import bed_lib as bl
 
 import click
 
@@ -27,6 +28,25 @@ def sra_to_fastq(sra, outdir='.'):
     cmd = 'fastq-dump --split-files --gzip -O {0} {1}'.format(outdir, sra)
     subprocess.run(cmd, shell=True, check=True)
 
+    
+def get_bam_from_sra_by_interval(sra, interval, flank):
+    """Get an alignment from SRA database for the specified interval
+    The interval is a Interval object from bed_lib
+    """
+
+    bam = "{sra}_{name}.bam".format(sra=sra, name=interval.chro +
+                                    '_' + str(interval.start) +
+                                    '_' + str(interval.end))
+    
+    cmd = 'sam-dump --aligned-region {chr}:{start}-{end} {sra} | samtools view -bh > {bam}'.format(chr=interval.chro,
+                                                                                                   start=interval.start - flank,
+                                                                                                   end=interval.end + flank,
+                                                                                                   bam=bam,
+                                                                                                   sra=sra)
+    logger.debug(cmd)
+    subprocess.check_output(cmd, shell=True)
+    
+    
 def get_bam_by_sra_and_gene(sra, gene, flank):
     """From a SRA accession and an couple gene_id/gene/entry from the
     basics_ensembl.parse_id_name_list function, fetch the
@@ -49,6 +69,20 @@ def get_bam_by_sra_and_gene(sra, gene, flank):
     logger.debug(cmd)
     subprocess.check_output(cmd, shell=True)
 
+    
+def get_all_bams_from_bed(sras, bed, flank=0, threads=1):
+    """From a list of sras and a bed file, extract alignments from SRA
+    corresponding to the coordinates from the bed file.
+    """
+    
+    p = Pool(threads)
+    
+    bed = bl.Bed(bed)
+    for interval in bed.get_intervals():
+        print(str(interval))
+
+        p.map(partial(get_bam_from_sra_by_interval, interval=interval, flank=flank), sras)
+        
 
 def get_all_bams(sras, gene_file, flank, threads):
     """
